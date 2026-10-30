@@ -43,6 +43,10 @@ Node solo se necesita para desarrollo/compilación. El bundle público está inc
 
 ## Verificación
 
-La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La fotografía ilustrativa original carga de forma progresiva, con ilustración local de respaldo. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
+La interfaz usa una consola de operaciones en negro/grafito, tipografía condensada y acentos ámbar, siguiendo la referencia visual del proyecto. El fondo ilustrativo de bodega es una imagen generada con IA, optimizada como `public/assets/warehouse.webp`; no representa una fotografía de la bodega real. El prompt de creación fue: «bodega de backline oscura con gabinetes negros, flight cases con perfiles metálicos, cables y fierros, luz ámbar tenue, espacio oscuro a la izquierda, sin personas, texto ni interfaces».
+
+El tour guiado ofrece 13 pasos contextuales con las pantallas existentes, foco visual, avance/retroceso, salida y control por teclado. Se ofrece en la primera visita y puede repetirse desde Ayuda o Ajustes. No ejecuta comandos de inventario, no activa la cámara y conserva las selecciones al salir. La preferencia de bienvenida se recuerda en este navegador.
+
+La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
 
 Pruebas PHP de dominio y persistencia en SQLite, generación/decodificación QR y flujo de navegador: kit → reserva parcial → despacho → devolución parcial. MySQL/MariaDB está preparado, sin afirmar una conexión al hosting final cuyas credenciales no están configuradas.
