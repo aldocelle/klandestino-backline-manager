@@ -1,5 +1,15 @@
 # Hosting PHP + MySQL/MariaDB
 
+## Demo temporal en Render
+
+`render.yaml` configura un Web Service gratuito con Docker, PHP 8.3 + Apache, puerto de Render y comprobación `/health.php`. El contenedor sirve exclusivamente `public/`. La demo ejecuta el backend PHP con `KB_DEMO_MODE=1`; guarda los cambios ficticios por navegador y no necesita SQL temporal ni credenciales.
+
+Para desplegar, conectar Render y crear el servicio desde el Blueprint del repositorio. También puede iniciarse desde https://render.com/deploy?repo=https://github.com/aldocelle/klandestino-backline-manager . Es un enlace de configuración, no una URL de la app publicada. No hay despliegue confirmado hasta recibir su estado y URL.
+
+Para una instalación real se desactiva KB_DEMO_MODE y se configura SQL externo con las variables descritas abajo. No usar el disco efímero del contenedor para una base SQLite de producción. `KB_COOKIE_SECURE=1` protege las cookies cuando Apache queda detrás del HTTPS de Render.
+
+`demo/` contiene una exportación estática opcional de la misma interfaz con simulador local. Se genera con `node tools/build-demo.mjs` y se verifica con `node tests/static-demo.mjs`. La aplicación PHP real usa public/ y nunca carga ese simulador.
+
 El destino final requiere ejecutar PHP: un servidor exclusivamente estático no puede acceder directamente a SQL. El navegador nunca recibe credenciales de la base de datos.
 
 ## Requisitos

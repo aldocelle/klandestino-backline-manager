@@ -67,7 +67,7 @@ try {
         $token = bin2hex(random_bytes(32)); $csrf = bin2hex(random_bytes(32));
         $store->db->prepare('INSERT INTO kb_sessions VALUES (?, ?, ?, ?)')->execute([hash('sha256', $token), $user['id'], $csrf, time()+28800]);
         $store->db->prepare('DELETE FROM kb_sessions WHERE expires_at < ?')->execute([time()]);
-        setcookie('kb_sid', $token, ['expires' => time()+28800, 'path' => '/', 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (bool)getenv('VERCEL'), 'httponly' => true, 'samesite' => 'Lax']);
+        setcookie('kb_sid', $token, ['expires' => time()+28800, 'path' => '/', 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (bool)getenv('VERCEL') || getenv('KB_COOKIE_SECURE') === '1', 'httponly' => true, 'samesite' => 'Lax']);
         reply(['ok' => true]);
     }
     $q = $store->db->prepare('SELECT u.id,u.name,u.email,u.role,s.csrf FROM kb_sessions s JOIN kb_users u ON s.user_id=u.id WHERE s.token_hash=? AND s.expires_at>?');

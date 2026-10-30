@@ -1,0 +1,10 @@
+.git
+.local
+.vercel
+node_modules
+config/config.local.php
+.env*
+*.sqlite*
+*.log
+demo
+tests

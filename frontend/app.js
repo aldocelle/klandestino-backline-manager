@@ -55,6 +55,7 @@ function toast(text, error=false) {
   const node=document.createElement('div');node.className=`toast${error?' error':''}`;node.innerHTML=`${icon(error?'info':'check')}<span>${esc(text)}</span>`;$('#toasts').append(node);setTimeout(()=>node.remove(),6500);
 }
 async function api(action, payload=null, headers={}) {
+  if(typeof window.__KB_DEMO_API__==='function')return window.__KB_DEMO_API__(action,payload);
   const res=await fetch(`api.php?action=${encodeURIComponent(action)}`,{credentials:'same-origin',cache:'no-store',method:payload?'POST':'GET',headers:payload?{'Content-Type':'application/json','X-CSRF-Token':csrf||'',...headers}:headers,body:payload?JSON.stringify(payload):undefined});
   let data;try{data=await res.json();}catch{throw new Error('El servidor no respondió con datos válidos.');}
   if(!res.ok && !data.requiresLogin && !data.configurationRequired){if(res.status===409 && data.state){state=data.state;render();}throw new Error(data.error||'No se pudo completar la operación.');}

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: klandestino-backline-manager
+    runtime: docker
+    plan: free
+    repo: https://github.com/aldocelle/klandestino-backline-manager
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health.php
+    autoDeployTrigger: off
+    envVars:
+      - key: KB_DEMO_MODE
+        value: "1"
+      - key: KB_COOKIE_SECURE
+        value: "1"

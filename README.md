@@ -27,6 +27,8 @@ La configuración, acabados y cantidades adicionales son ejemplos basados en el 
 
 ## Instalación
 
+El destino temporal seleccionado es **Render**: ver `render.yaml` y `Dockerfile`. La demo ejecuta PHP y conserva datos ficticios por navegador. [Preparar despliegue en Render](https://render.com/deploy?repo=https://github.com/aldocelle/klandestino-backline-manager).
+
 Ver [DEPLOYMENT.md](DEPLOYMENT.md). La raíz pública es public/; src/ y config/ deben quedar fuera de ella. El hosting debe admitir PHP además de SQL.
 
 ```sh
