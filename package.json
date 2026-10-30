@@ -1,0 +1,13 @@
+{
+  "name": "klandestino-backline-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/dev.mjs",
+    "build": "esbuild frontend/app.js --bundle --minify --format=esm --outfile=public/assets/app.bundle.js",
+    "test": "node tools/php.mjs tests/run.php"
+  },
+  "dependencies": {"qrcode": "1.5.4", "jsqr": "1.4.0"},
+  "devDependencies": {"esbuild": "0.25.12"}
+}

@@ -1,0 +1,7 @@
+.git/
+.local/
+node_modules/
+tests/
+config/config.local.php
+*.sqlite*
+*.log

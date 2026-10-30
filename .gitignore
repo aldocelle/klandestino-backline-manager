@@ -1,0 +1,10 @@
+node_modules/
+.local/
+.vercel/
+config/config.local.php
+.env*
+!config/.env.example
+*.sqlite*
+*.log
+vendor/
+public/assets/app.bundle.js.map
