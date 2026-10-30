@@ -43,4 +43,6 @@ Node solo se necesita para desarrollo/compilación. El bundle público está inc
 
 ## Verificación
 
+La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La fotografía ilustrativa original carga de forma progresiva, con ilustración local de respaldo. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
+
 Pruebas PHP de dominio y persistencia en SQLite, generación/decodificación QR y flujo de navegador: kit → reserva parcial → despacho → devolución parcial. MySQL/MariaDB está preparado, sin afirmar una conexión al hosting final cuyas credenciales no están configuradas.

@@ -4,6 +4,6 @@ const seed=execFileSync(process.execPath,['tools/php.mjs','-r','require "src/see
 JSON.parse(seed);writeFileSync('frontend/demo-seed.json',seed+'\n');
 mkdirSync('demo/assets',{recursive:true});
 cpSync('public/assets','demo/assets',{recursive:true});
-writeFileSync('demo/index.html',readFileSync('public/index.html','utf8').replace('src="assets/app.bundle.js"','src="assets/demo.bundle.js"'));
+writeFileSync('demo/index.html',readFileSync('public/index.html','utf8').replace('assets/app.bundle.js','assets/demo.bundle.js'));
 execFileSync('node_modules/.bin/esbuild',['frontend/demo-entry.js','--bundle','--minify','--format=esm','--outfile=demo/assets/demo.bundle.js'],{stdio:'inherit'});
 console.log('Static demonstration built in demo/. The PHP installation remains in public/.');
