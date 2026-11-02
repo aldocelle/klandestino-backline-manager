@@ -8,3 +8,4 @@ config/config.local.php
 *.log
 vendor/
 public/assets/app.bundle.js.map
+.vercel
