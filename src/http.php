@@ -31,7 +31,7 @@ try {
         require_ok(!$origin || (parse_url($origin, PHP_URL_HOST) . (parse_url($origin, PHP_URL_PORT) ? ':' . parse_url($origin, PHP_URL_PORT) : '')) === ($_SERVER['HTTP_HOST'] ?? ''), 'Origen de solicitud no permitido.');
     }
     if ($demo) {
-        if ($action === 'bootstrap' && $method === 'GET') reply(['mode' => 'demo', 'state' => seed_state(), 'csrf' => 'demo', 'user' => ['id' => 'demo', 'name' => 'Operador demo', 'role' => 'admin']]);
+        if ($action === 'bootstrap' && $method === 'GET') reply(['mode' => 'demo', 'state' => demo_state(), 'csrf' => 'demo', 'user' => ['id' => 'demo', 'name' => 'Operador demo', 'role' => 'admin']]);
         if ($action === 'command' && $method === 'POST') {
             $body = request_body(); $state = $body['state'] ?? null;
             require_ok(is_array($state) && ($state['version'] ?? 0) === 1 && count($state['assets'] ?? []) < 4000 && count($state['movements'] ?? []) < 10000, 'Los datos demo no son válidos.');

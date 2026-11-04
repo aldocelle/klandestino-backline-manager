@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-const seed=execFileSync(process.execPath,['tools/php.mjs','-r','require "src/seed.php"; echo json_encode(seed_state(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);'],{encoding:'utf8'});
+const seed=execFileSync(process.execPath,['tools/php.mjs','-r','require "src/seed.php"; echo json_encode(demo_state(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);'],{encoding:'utf8'});
 JSON.parse(seed);writeFileSync('frontend/demo-seed.json',seed+'\n');
 mkdirSync('demo/assets',{recursive:true});
 cpSync('public/assets','demo/assets',{recursive:true});

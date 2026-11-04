@@ -30,13 +30,6 @@ function seed_state(): array
         ['B1', 'Atril con boom 01', 'Fierros'], ['B2', 'Atril con boom 02', 'Fierros'],
         ['B3', 'Atril con boom 03', 'Fierros'], ['B4', 'Atril con boom 04', 'Fierros'],
         ['R1', 'Atril recto 01', 'Fierros'], ['R2', 'Atril recto 02', 'Fierros'],
-        // No están en la planilla, pero bodega confirmó su existencia el 3/11/2026 (por kit).
-        ['TM1', 'Soporte de tom 01', 'Fierros'], ['TM2', 'Soporte de tom 02', 'Fierros'], ['TM3', 'Soporte de tom 03', 'Fierros'],
-        ['PD1', 'Pedal de bombo 01', 'Fierros'], ['PD2', 'Pedal de bombo 02', 'Fierros'], ['DP', 'Pedal doble', 'Fierros'],
-        ['HR', 'Varilla hi-hat', 'Accesorios'], ['CL', 'Clutch hi-hat', 'Accesorios'],
-        ['FBD1', 'Funda bombo 22” · derecho', 'Cases'], ['FBD2', 'Funda bombo 22” · izquierdo', 'Cases'], ['FSN', 'Funda caja 14”', 'Cases'],
-        ['FT10', 'Funda tom 10”', 'Cases'], ['FT12', 'Funda tom 12”', 'Cases'], ['FT13', 'Funda tom 13”', 'Cases'],
-        ['FF14', 'Funda tom de piso 14”', 'Cases'], ['FF16', 'Funda tom de piso 16”', 'Cases'],
     ];
     foreach ([1, 2] as $n) {
         $code = 'TAM-SCM-00' . $n;
@@ -48,7 +41,7 @@ function seed_state(): array
         }
         $kits[] = ['id' => $code, 'name' => 'Tama Starclassic 0' . $n, 'brand' => 'Tama',
             'finish' => $n === 1 ? 'Maple Tobacco Burst' : 'Dark Mocha Fade', 'assembled' => true,
-            'expectedIds' => $ids, 'note' => 'Doble bombo 2×22” · toms 10”, 12”, 13” · piso 14”, 16” · caja ' . $snare[0] . ' ' . $snare[1] . ' 14” · fundas para cada tambor · ' . count($ids) . ' piezas trazables.'];
+            'expectedIds' => $ids, 'note' => 'Doble bombo 2×22” · toms 10”, 12”, 13” · piso 14”, 16” · caja ' . $snare[0] . ' ' . $snare[1] . ' 14” · ' . count($ids) . ' piezas trazables.'];
     }
     $add('TAM-SCM-T08-001', 'Tom 8”', 'Tambores', 'Tama', 'Starclassic');
     $many('TAM-SCM-F18', 'Tom de piso 18”', 2, 'Tambores', 'Tama', 'Starclassic');
@@ -98,6 +91,16 @@ function seed_state(): array
     $many('ACC-FAN', 'Ventilador', 4, 'Accesorios', '', '');
     $many('ACC-RUG', 'Alfombra', 2, 'Accesorios', '', '');
     $now = new DateTimeImmutable('now', new DateTimeZone('America/Santiago'));
+    return ['version' => 1, 'revision' => 0, 'assets' => $assets, 'kits' => $kits, 'events' => [], 'crew' => default_crew(),
+        'movements' => [['id' => 'MOV-SEED', 'at' => $now->format(DATE_ATOM), 'type' => 'seed',
+            'summary' => 'Inventario oficial 2026 cargado', 'assetIds' => [], 'actor' => 'Sistema', 'eventId' => null, 'note' => 'Planilla «INVENTARIO BACKLINE KLAN FULL»: solo las piezas que vienen en ella.']]];
+}
+
+/** Demo: inventario oficial más dos eventos de ejemplo, algunas piezas fuera y una en revisión. */
+function demo_state(): array
+{
+    $state = seed_state(); $assets = $state['assets'];
+    $now = new DateTimeImmutable('now', new DateTimeZone('America/Santiago'));
     $events = [
         ['id' => 'EVT-DEMO-001', 'name' => 'Festival Metal', 'place' => 'Santiago · Escenario principal',
             'start' => $now->modify('+1 day')->format('Y-m-d') . 'T09:00', 'end' => $now->modify('+2 days')->format('Y-m-d') . 'T12:00',
@@ -114,7 +117,7 @@ function seed_state(): array
         if ($asset['id'] === 'HW-BOOM-008') { $asset['status'] = 'maintenance'; $asset['condition'] = 'damage'; $asset['location'] = 'Taller'; $asset['note'] = 'Revisar mariposa de ajuste.'; }
     }
     unset($asset);
-    return ['version' => 1, 'revision' => 0, 'assets' => $assets, 'kits' => $kits, 'events' => $events, 'crew' => default_crew(),
-        'movements' => [['id' => 'MOV-SEED', 'at' => $now->format(DATE_ATOM), 'type' => 'seed',
-            'summary' => 'Inventario oficial 2026 cargado', 'assetIds' => [], 'actor' => 'Sistema demo', 'eventId' => null, 'note' => 'Planilla «INVENTARIO BACKLINE KLAN FULL». Eventos y movimientos de ejemplo solo en la demo.']]];
+    $state['assets'] = $assets; $state['events'] = $events;
+    $state['movements'][0]['actor'] = 'Sistema demo'; $state['movements'][0]['note'] .= ' Eventos y movimientos de ejemplo solo en la demo.';
+    return $state;
 }
