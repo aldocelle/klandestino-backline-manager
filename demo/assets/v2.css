@@ -392,3 +392,10 @@ body .crew-row.crew-row-btn{display:flex;align-items:center;gap:12px;width:100%;
 button.event-poster-thumb.is-default{cursor:pointer}
 button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
 .event-card-poster.is-default img{object-position:center 55%}
+/* Filas alternadas para leer mejor las tablas (escritorio y tablet) */
+@media(min-width:641px){
+  tbody tr:nth-child(even):not(.branch-row):not(.in-cart):not(.open)>td{background-color:#ffffff0a}
+  tbody tr.group-row:nth-child(even):not(.open):not(.has-cart)>td{background-color:#1f2226}
+  tbody tr:not(.branch-row):not(.in-cart):hover>td{background-color:#ffffff12}
+  tbody tr.group-row:not(.open):hover>td{background-color:#25282d}
+}
