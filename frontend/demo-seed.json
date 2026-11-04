@@ -1721,7 +1721,7 @@
     "movements": [
         {
             "id": "MOV-SEED",
-            "at": "2026-11-03T23:10:43-03:00",
+            "at": "2026-11-03T23:14:29-03:00",
             "type": "seed",
             "summary": "Inventario de demostración cargado",
             "assetIds": [],
