@@ -427,7 +427,8 @@ button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
 .cart-tab.c0.active{border-color:var(--gold);background:#2a2418}.cart-tab.c0.active b{color:var(--gold)}.cart-tab.c0.active .cart-tab-count{background:var(--gold);color:#20190d}
 .cart-tab.c1.active{border-color:#6fa8ff;background:#17243a}.cart-tab.c1.active b{color:#9cc3ff}.cart-tab.c1.active .cart-tab-count{background:#6fa8ff;color:#0d1a2e}
 .cart-drawer.cart-c1 #cartTitle .icon{color:#6fa8ff}
-.cart-btn.cart-c1{border-color:#6fa8ff;color:#9cc3ff}.cart-btn.cart-c1 .cart-count{background:#6fa8ff;color:#0d1a2e}
+.cart-btn.cart-c1{border-color:#6fa8ff99;color:#9cc3ff}.cart-btn.cart-c1 .cart-count{background:#6fa8ff;color:#0d1a2e}
+.cart-btn.cart-c1.has-items{background:#6fa8ff;border-color:#6fa8ff;color:#0d1a2e}.cart-btn.cart-c1.has-items .cart-count:not(.other){background:#0d1a2e;color:#9cc3ff}
 .cart-count.other{margin-left:4px;opacity:.9}.cart-count.other.cart-0{background:var(--gold);color:#20190d}.cart-count.other.cart-1{background:#6fa8ff;color:#0d1a2e}
 .cart-na.other-cart{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
 .cart-na.other-cart.cart-0{color:var(--gold);border:1px solid #e0ae4566;background:#e0ae4512}
@@ -438,13 +439,32 @@ button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
 .inventory-panel tr.cart-row-0:not(.in-cart)>td{background-color:#e3a83d0d!important}
 .inventory-panel tr.cart-row-0:not(.in-cart)>td:first-child{box-shadow:inset 3px 0 var(--gold)}
 /* Estado: la celda completa toma el color del estado */
-td.status-cell.st-available,td.status-cell.st-returned{background-color:#163626!important}
-td.status-cell.st-reserved,td.status-cell.st-partial{background-color:#3b2f15!important}
-td.status-cell.st-out{background-color:#1a2a47!important}
-td.status-cell.st-maintenance{background-color:#43201b!important}
-td.status-cell.st-missing{background-color:#4a1c28!important}
-td.status-cell.st-none{background-color:#2c2023!important}
+tbody tr>td.status-cell.status-cell.st-available,tbody tr>td.status-cell.status-cell.st-returned{background-color:#163626!important}
+tbody tr>td.status-cell.status-cell.st-reserved,tbody tr>td.status-cell.status-cell.st-partial{background-color:#3b2f15!important}
+tbody tr>td.status-cell.status-cell.st-out{background-color:#1a2a47!important}
+tbody tr>td.status-cell.status-cell.st-maintenance{background-color:#43201b!important}
+tbody tr>td.status-cell.status-cell.st-missing{background-color:#4a1c28!important}
+tbody tr>td.status-cell.status-cell.st-none{background-color:#2c2023!important}
 td.status-cell{transition:background-color .2s}
 @media(max-width:640px){td.status-cell{border-radius:6px;padding:6px 8px!important}}
 .cart-bar.cart-c1{background:#6fa8ff;border-color:#6fa8ff;color:#0d1a2e}
 .cart-bar.cart-c1 *{color:#0d1a2e}
+/* Recorte de foto del técnico */
+.crop-overlay{position:fixed;inset:0;z-index:2000;background:#000c;display:grid;place-items:center;padding:16px}
+.crop-card{width:min(360px,100%);background:#17191c;border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+.crop-card h3{font-size:22px}
+.crop-stage{position:relative;width:260px;height:260px;margin:0 auto;overflow:hidden;border-radius:12px;background:#0d0e10;touch-action:none;cursor:grab;outline-offset:3px}
+.crop-stage:active{cursor:grabbing}
+.crop-stage img{position:absolute;left:0;top:0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.crop-ring{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px #000a;border:2px solid var(--gold);pointer-events:none}
+.crop-zoom{display:flex;align-items:center;gap:10px}.crop-zoom input{flex:1;accent-color:var(--gold)}
+.crop-foot{display:flex;justify-content:flex-end;gap:8px}
+/* Acceso a la app desde el perfil y roles */
+.crew-access{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:10px;background:#15171a}
+.crew-access h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.access-role{display:grid;gap:6px;max-width:260px}
+.access-creds{display:grid;gap:8px;padding:12px;border-radius:8px;background:#0f1113;border:1px dashed #e0ae4566}
+.access-creds small{display:block;font-size:10px;letter-spacing:1px;color:var(--muted)}.access-creds b{font-size:15px;word-break:break-all}
+.user-row{gap:10px}.user-row select{max-width:160px}
+.tech-fn{display:block;font-style:normal;font-size:12px;color:var(--gold);margin-top:2px}
+.cart-count[hidden]{display:none}

@@ -79,8 +79,9 @@ try {
         $store->db->prepare('DELETE FROM kb_sessions WHERE token_hash=?')->execute([hash('sha256', $_COOKIE['kb_sid'] ?? '')]); setcookie('kb_sid', '', ['expires' => 1, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax']); reply(['ok' => true]);
     }
     if ($action === 'command' && $method === 'POST') {
-        require_ok(in_array($user['role'], ['admin', 'operator'], true), 'Tu usuario tiene acceso de consulta.');
-        $body = request_body(); require_ok(is_int($body['revision'] ?? null), 'Revisión de inventario inválida.');
+        $body = request_body(); $type = is_array($body['command'] ?? null) ? (string)($body['command']['type'] ?? '') : '';
+        require_ok(role_allows($user['role'], $type), $user['role'] === 'reader' ? 'Tu usuario tiene acceso de consulta.' : 'Tu rol no permite esta acción. Pídesela a un encargado.');
+        require_ok(is_int($body['revision'] ?? null), 'Revisión de inventario inválida.');
         try { reply(['state' => $store->command($body['command'] ?? [], $user['name'], $body['revision'])]); }
         catch (DomainError $e) { if ($e->getMessage() === 'CONFLICT') reply(['error' => 'Otro encargado actualizó el inventario. Revisa la selección y vuelve a confirmar.', 'state' => $store->read()], 409); throw $e; }
     }
@@ -103,9 +104,24 @@ try {
     if ($action === 'user_create' && $method === 'POST') {
         require_ok($user['role'] === 'admin', 'Solo administración puede crear usuarios.'); $body = request_body();
         $name = clean_text($body['name'] ?? '', 120); $email = strtolower(clean_text($body['email'] ?? '', 190)); $password = $body['password'] ?? ''; $role = $body['role'] ?? 'reader';
-        require_ok($name !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) !== false && is_string($password) && strlen($password) >= 12 && strlen($password) <= 128 && in_array($role, ['admin', 'operator', 'reader'], true), 'Completa los datos; la contraseña debe tener de 12 a 128 caracteres.');
+        require_ok($name !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) !== false && is_string($password) && strlen($password) >= 12 && strlen($password) <= 128 && in_array($role, ['admin', 'operator', 'tech', 'reader'], true), 'Completa los datos; la contraseña debe tener de 12 a 128 caracteres.');
         $q = $store->db->prepare('SELECT id FROM kb_users WHERE email=?'); $q->execute([$email]); require_ok(!$q->fetch(), 'Ese correo ya está registrado.');
         $store->db->prepare('INSERT INTO kb_users VALUES (?,?,?,?,?)')->execute([bin2hex(random_bytes(12)), $name, $email, password_hash($password, PASSWORD_DEFAULT), $role]); reply(['ok' => true]);
+    }
+    if ($action === 'user_update' && $method === 'POST') {
+        require_ok($user['role'] === 'admin', 'Solo administración puede cambiar permisos.'); $body = request_body();
+        $id = (string)($body['id'] ?? ''); $role = $body['role'] ?? '';
+        require_ok(in_array($role, ['admin', 'operator', 'tech', 'reader'], true), 'Rol inválido.');
+        require_ok($id !== $user['id'], 'No puedes cambiar tu propio rol.');
+        $q = $store->db->prepare('SELECT id FROM kb_users WHERE id=?'); $q->execute([$id]); require_ok($q->fetchColumn() !== false, 'Usuario no encontrado.');
+        $store->db->prepare('UPDATE kb_users SET role=? WHERE id=?')->execute([$role, $id]); reply(['ok' => true]);
+    }
+    if ($action === 'user_delete' && $method === 'POST') {
+        require_ok($user['role'] === 'admin', 'Solo administración puede quitar accesos.'); $body = request_body(); $id = (string)($body['id'] ?? '');
+        require_ok($id !== $user['id'], 'No puedes quitarte tu propio acceso.');
+        $q = $store->db->prepare('SELECT id FROM kb_users WHERE id=?'); $q->execute([$id]); require_ok($q->fetchColumn() !== false, 'Usuario no encontrado.');
+        $store->db->prepare('DELETE FROM kb_sessions WHERE user_id=?')->execute([$id]);
+        $store->db->prepare('DELETE FROM kb_users WHERE id=?')->execute([$id]); reply(['ok' => true]);
     }
     reply(['error' => 'Ruta no encontrada.'], 404);
 } catch (DomainError $e) { reply(['error' => $e->getMessage()], 422); }

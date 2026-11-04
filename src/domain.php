@@ -26,6 +26,9 @@ function equipment_icon_keys(): array { return ['kit','kick','snare','tom','floo
 function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon) ? trim($icon) : ''; if ($icon === '') return '';
     if (preg_match('/^photo:(\d)$/D', $icon, $m)) { require_ok((int)$m[1] < count($asset['photos'] ?? []), 'Esa foto ya no existe.'); return $icon; }
     require_ok(in_array($icon, equipment_icon_keys(), true), 'Ícono inválido.'); return $icon; }
+// Permisos por rol: administrador y encargado, todo; técnico, solo el trabajo diario de bodega; consulta, nada.
+function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer']; }
+function role_allows(string $role, string $type): bool { if (in_array($role, ['admin', 'operator'], true)) return true; return $role === 'tech' && in_array($type, tech_commands(), true); }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
@@ -219,6 +222,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
             foreach ($crew as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un técnico con ese nombre.');
             foreach ($crew as &$t) if ($t['id'] === $tid) {
                 $t['name'] = $name; $t['email'] = $email; $t['phone'] = $phone; $found = true;
+                if (array_key_exists('function', $cmd)) $t['function'] = clean_text($cmd['function'] ?? '', 60);
                 if (array_key_exists('photo', $cmd)) $t['photo'] = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000);
             } unset($t);
             require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Perfil de técnico actualizado: ' . $name; break;
