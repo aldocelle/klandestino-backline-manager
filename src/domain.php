@@ -20,6 +20,8 @@ function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['
 function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
+function code_taken(array $state, string $code, ?string $exceptId = null): bool { foreach ($state['assets'] as $a) if ($a['id'] !== $exceptId && ($a['id'] === $code || ($a['code'] ?? '') === $code)) return true; foreach ($state['kits'] as $k) if ($k['id'] === $code) return true; return false; }
+function clean_code(mixed $code): string { $code = strtoupper(clean_text($code ?? '', 60)); require_ok((bool)preg_match('/^[A-Z0-9][A-Z0-9_-]{2,59}$/D', $code), 'Usa un código de 3 a 60 letras, números o guiones.'); return $code; }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
@@ -41,9 +43,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
     $newId = fn(string $prefix): string => $prefix . '-' . strtoupper(bin2hex(random_bytes(5)));
     switch ($type) {
         case 'create_asset':
-            $code = strtoupper(clean_text($cmd['code'] ?? '', 60));
-            require_ok((bool)preg_match('/^[A-Z0-9][A-Z0-9_-]{2,59}$/D', $code), 'Usa un código de 3 a 60 letras, números o guiones.');
-            foreach ($state['assets'] as $a) require_ok($a['code'] !== $code, 'Ese código ya existe.');
+            $code = clean_code($cmd['code'] ?? ''); require_ok(!code_taken($state, $code), 'Ese código ya existe.');
             $name = clean_text($cmd['name'] ?? ''); require_ok($name !== '', 'Escribe el nombre del equipo.');
             $category = clean_text($cmd['category'] ?? 'Accesorios', 60);
             $warehouse = clean_text($cmd['location'] ?? 'Bodega A', 120); require_ok(in_array($warehouse, warehouses(), true), 'Elige Bodega A o Bodega B.');
@@ -58,6 +58,9 @@ function apply_command(array $state, array $cmd, string $actor): array {
             require_ok($name !== '', 'Escribe el nombre del equipo.');
             $category = clean_text($cmd['category'] ?? $state['assets'][$ai]['category'], 60);
             require_ok(in_array($category, ['Tambores', 'Platillos', 'Fierros', 'Accesorios', 'Gabinetes', 'Cabezales', 'Micrófonos', 'Cables', 'Cases'], true), 'Categoría inválida.');
+            $oldCode = $state['assets'][$ai]['code'] ?? $state['assets'][$ai]['id']; $newCode = $oldCode;
+            if (isset($cmd['code']) && $cmd['code'] !== '') { $newCode = clean_code($cmd['code']); require_ok($newCode === $oldCode || !code_taken($state, $newCode, $state['assets'][$ai]['id']), 'Ese código ya lo usa otro equipo o kit.'); }
+            $state['assets'][$ai]['code'] = $newCode;
             $state['assets'][$ai] = array_merge($state['assets'][$ai], ['name' => $name, 'category' => $category,
                 'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
                 'serial' => clean_text($cmd['serial'] ?? '', 100), 'note' => clean_text($cmd['note'] ?? '', 500)]);

@@ -12,6 +12,7 @@ const isAvailable=a=>a.status==='available'&&a.condition==='ok';
 export const WAREHOUSES=['Bodega A','Bodega B'];
 const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
 export const defaultCrew=()=>Array.from({length:10},(_,i)=>({id:`TEC-${String(i+1).padStart(2,'0')}`,name:`Técnico ${String(i+1).padStart(2,'0')}`,active:true}));
+const codeTaken=(s,code,exceptId=null)=>s.assets.some(a=>a.id!==exceptId&&(a.id===code||a.code===code))||s.kits.some(k=>k.id===code);
 const jpeg=(v,max)=>{ok(typeof v==='string'&&v.length<max&&v.startsWith('data:image/jpeg;base64,'),'La foto debe ser JPEG y liviana.');ok(atob(v.slice(23)).startsWith('\xff\xd8\xff'),'Foto inválida.');return v;};
 const photos=list=>{if(list==null||list==='')return [];ok(Array.isArray(list)&&list.length<=3,'Agrega hasta 3 fotos por pieza.');return list.map(p=>jpeg(p,90000));};
 export const TM_TYPES=['load_in','stage_setup','rigging','pa_setup','lighting_setup','backline_setup','line_check','soundcheck','doors','performance','changeover','stage_reset','curfew','load_out','crew_break','meeting','custom'];
@@ -30,13 +31,13 @@ export function applyDemoCommand(source,cmd){
   switch(cmd.type){
     case 'create_asset':{
       const code=text(cmd.code,60).toUpperCase(),name=text(cmd.name),category=text(cmd.category||'Accesorios',60),warehouse=text(cmd.location||'Bodega A',120);ok(WAREHOUSES.includes(warehouse),'Elige Bodega A o Bodega B.');
-      ok(/^[A-Z0-9][A-Z0-9_-]{2,59}$/.test(code),'Código inválido.');ok(!s.assets.some(a=>a.code===code),'Ese código ya existe.');ok(name,'Escribe el nombre del equipo.');
+      ok(/^[A-Z0-9][A-Z0-9_-]{2,59}$/.test(code),'Código inválido.');ok(!codeTaken(s,code),'Ese código ya existe.');ok(name,'Escribe el nombre del equipo.');
       ok(['Tambores','Platillos','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');
       s.assets.push({id:code,code,name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),location:warehouse,home:warehouse,serial:text(cmd.serial,100),kitId:null,status:'available',condition:'ok',eventId:null,note:'',photos:photos(cmd.photos)});
       ids=[code];summary='Equipo incorporado: '+name;break;
     }
     case 'asset_photos':{const a=asset(cmd.assetId);a.photos=photos(cmd.photos);ids=[a.id];summary='Fotos actualizadas: '+a.name;break;}
-    case 'asset_update':{const a=asset(cmd.assetId),name=text(cmd.name),category=text(cmd.category||a.category,60);ok(name,'Escribe el nombre del equipo.');ok(['Tambores','Platillos','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');Object.assign(a,{name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),serial:text(cmd.serial,100),note:text(cmd.note,500)});ids=[a.id];summary='Detalle actualizado: '+name;break;}
+    case 'asset_update':{const a=asset(cmd.assetId),name=text(cmd.name),category=text(cmd.category||a.category,60),oldCode=a.code||a.id,newCode=cmd.code?text(cmd.code,60).toUpperCase():oldCode;if(newCode!==oldCode){ok(/^[A-Z0-9][A-Z0-9_-]{2,59}$/.test(newCode),'Usa un código de 3 a 60 letras, números o guiones.');ok(!codeTaken(s,newCode,a.id),'Ese código ya lo usa otro equipo o kit.');}a.code=newCode;ok(name,'Escribe el nombre del equipo.');ok(['Tambores','Platillos','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');Object.assign(a,{name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),serial:text(cmd.serial,100),note:text(cmd.note,500)});ids=[a.id];summary='Detalle actualizado: '+name;break;}
     case 'crew_profile':{const crew=structuredClone(crewOf(s)),t=crew.find(t=>t.id===cmd.crewId),name=text(cmd.name,80),email=text(cmd.email||'',190).toLowerCase();ok(t,'Técnico no encontrado.');ok(name,'Escribe el nombre del técnico.');ok(!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'Revisa el email del técnico.');ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');Object.assign(t,{name,email,phone:phone(cmd.phone||'')});if('photo' in cmd)t.photo=cmd.photo?jpeg(cmd.photo,90000):'';s.crew=crew;summary='Perfil de técnico actualizado: '+name;break;}
     case 'create_kit':{
       ids=selected(cmd);const name=text(cmd.name);ok(name,'Escribe el nombre del kit.');const kitId=uid('KIT'),locations=[];
