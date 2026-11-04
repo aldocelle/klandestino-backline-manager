@@ -247,3 +247,66 @@ body[data-motion="off"] .cart-drawer,body[data-motion="off"] .cart-scrim{animati
 #view .product-name,#view .text-link.product-name{font-size:16px}
 #view .product-detail{font-size:14px}
 #view .eyebrow{letter-spacing:.06em}
+
+/* ── Ramas por instrumento (Equipos) ───────────── */
+.group-row td{background:#17191c}
+.group-row.open td{background:#1b1d21}
+.group-toggle{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:0;border:0;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.group-toggle .chev{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:8px;border:1px solid #3a3d43;flex:none;transition:border-color .15s,background .15s}
+.group-toggle .chev .icon{width:18px;height:18px;transform:rotate(-90deg);transition:transform .2s}
+.group-row.open .chev{border-color:var(--gold);background:#e3a83d1a;color:var(--gold)}
+.group-row.open .chev .icon{transform:none}
+.group-toggle:hover .chev{border-color:var(--gold)}
+.group-name strong{display:block;font-size:17px;font-weight:700;line-height:1.25}
+#view .group-name small{display:block;font-size:14px;color:var(--muted);margin-top:2px}
+.group-name small b{color:var(--gold);font-weight:600}
+.inventory-panel tr.group-row.has-cart td:first-child{box-shadow:inset 3px 0 var(--gold)}
+#view .group-free{display:inline-block;font-size:14px;font-weight:600;padding:4px 11px;border-radius:999px;white-space:nowrap}
+.group-free.all{color:#9de3b5;background:#49ba711f}
+.group-free.some{color:#f0c879;background:#e3a83d1f}
+.group-free.none{color:#f19b94;background:#e3564e1f}
+.inventory-panel tr.branch-row td{background:#121416}
+.inventory-panel tr.branch-row.in-cart td{background:#1d1a13}
+.inventory-panel tr.branch-row td:first-child{position:relative;padding-left:64px;box-shadow:none}
+.inventory-panel tr.branch-row td:first-child::before{content:"";position:absolute;left:31px;top:0;bottom:0;border-left:2px solid #3a3d43}
+.inventory-panel tr.branch-row td:first-child::after{content:"";position:absolute;left:31px;top:50%;width:22px;border-top:2px solid #3a3d43}
+.inventory-panel tr.branch-row.in-cart td:first-child::before,.inventory-panel tr.branch-row.in-cart td:first-child::after{border-color:var(--gold)}
+.branch-row .thumb{width:40px;height:40px}
+#view .branch-row .product-name{font-size:15px}
+#inventoryPagination{display:flex;justify-content:flex-end}
+@media(max-width:640px){
+  .inventory-panel tbody tr.group-row{background:#17191c}
+  .inventory-panel tbody tr.group-row.open{background:#1b1d21}
+  .inventory-panel tbody tr.group-row.has-cart{box-shadow:inset 3px 0 var(--gold)}
+  .inventory-panel tbody tr.group-row td,.inventory-panel tbody tr.branch-row td,.inventory-panel tbody tr.branch-row.in-cart td{background:none;box-shadow:none}
+  .inventory-panel tbody tr.branch-row{position:relative;background:#121416;padding-left:46px}
+  .inventory-panel tbody tr.branch-row td:first-child{padding-left:0}
+  .inventory-panel tbody tr.branch-row td:first-child::before,.inventory-panel tbody tr.branch-row td:first-child::after{display:none}
+  .inventory-panel tbody tr.branch-row::before{content:"";position:absolute;left:29px;top:0;bottom:0;border-left:2px solid #3a3d43}
+  .inventory-panel tbody tr.branch-row.in-cart{box-shadow:none;background:#1d1a13}
+  .inventory-panel tbody tr.branch-row.in-cart::before{border-color:var(--gold)}
+  #inventoryPagination{justify-content:stretch}
+  #inventoryPagination .btn{width:100%;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.group-toggle .chev .icon{transition:none}}
+
+/* ── Secciones Drum Kits / Guitarra / Bajo ─────── */
+.section-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.section-link{display:flex;align-items:center;gap:14px;min-height:72px;padding:14px 18px;border:1px solid #34373d;border-radius:12px;background:#17191c;color:var(--text);transition:border-color .15s}
+.section-link:hover{border-color:var(--gold)}
+.section-link>.icon:first-child{width:28px;height:28px;color:var(--gold);flex:none}
+.section-link>.icon:last-child{width:18px;height:18px;color:var(--muted);margin-left:auto;flex:none}
+.section-link strong{display:block;font-size:17px}
+#view .section-link small{display:block;font-size:14px;color:var(--muted)}
+.section-summary{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:16px;color:var(--muted)}
+.section-summary .icon{width:26px;height:26px;color:var(--gold)}
+.section-summary strong{font-size:22px;color:var(--text)}
+.section-panel{margin-bottom:18px}
+.section-panel .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.section-panel .panel-pad .btn{margin-top:10px}
+@media(max-width:640px){
+  .section-links{grid-template-columns:1fr;gap:8px}
+  .section-link{min-height:62px;padding:12px 14px}
+}
+
+#view .event-table-link{font-size:14px}
