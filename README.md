@@ -61,6 +61,8 @@ Tótem de técnicos (#totem, cartel imprimible con QR en Ajustes): el técnico e
 
 Informes de daño o faltante (Mantenimiento, ficha de pieza o tótem): tipo, piezas, descripción, foto de evidencia y técnico responsable; una pieza en bodega dañada pasa a Taller y una faltante a «Faltante». Cada informe se imprime con firmas y se cierra al resolverse. Los técnicos pueden tener foto (Ajustes o tótem) que aparece al elegir responsable. El tótem muestra tras 60 s sin uso una pantalla de descanso con el logo y la hora en dígitos rojos, apaga la cámara y mantiene la pantalla encendida donde el navegador lo permite.
 
+Reloj en la barra superior: hora, cuenta regresiva (rápidos, tiempo a medida, +1 min, memorias con nombre, alarma con sonido y vibración) y cronómetro con marcas parciales. Se guarda por dispositivo y sigue corriendo al cambiar de pantalla o recargar; la barra muestra el tiempo restante en rojo.
+
 Hay dos bodegas, nombradas solo «Bodega A» y «Bodega B»; la app no guarda sus direcciones. Cada pieza tiene una bodega base: al volver de un evento o del taller regresa a ella. «Trasladar» (en la selección del inventario y en la ficha de kit) mueve piezas disponibles entre bodegas y queda en el historial; un kit trasladado completo sigue armado. El inventario filtra por bodega o «Fuera de bodega».
 
 La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
