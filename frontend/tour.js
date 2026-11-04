@@ -25,8 +25,8 @@ function menuSteps(){
     :{route:'dashboard',target:'.sidebar .nav',title:'Tu menú lateral',text:'A la izquierda están todas las secciones. «Trabajo diario» reúne lo que usas en cada salida; «Más herramientas», lo de apoyo y configuración. La sección activa se marca en dorado.'}];
   const items=mobile?MOBILE_NAV.map(k=>MENU.find(m=>m[0]===k)):MENU;
   for(const [path,title,text] of items)steps.push({route:'dashboard',target:link(path),title,text});
-  if(mobile)steps.push({route:'dashboard',target:'.mobile-more-btn',title:'Más herramientas',text:'Tótem técnicos, Técnicos, Mantenimiento, Reportes y Ajustes están en este botón. Guitarra y Bajo se abren desde Equipos. En Ajustes → Ayuda de la aplicación puedes repetir este recorrido.'});
-  else steps.push({route:'dashboard',target:'.sidebar-help, .tour-help-btn',title:'Ayuda y tour guiado',text:'Vuelve a abrir este recorrido cuando quieras desde aquí.'});
+  if(mobile)steps.push({route:'dashboard',target:'#userBtn',title:'Tu menú y más herramientas',text:'Toca tu foto o tus iniciales: ahí están tu perfil, Ajustes (con tótem, técnicos, mantenimiento y reportes), cambiar de usuario y cerrar sesión. Guitarra y Bajo se abren desde Equipos. En Ajustes → Ayuda puedes repetir este recorrido.'});
+  else{steps.push({route:'dashboard',target:'#userBtn',title:'Tu menú de usuario',text:'Toca tu foto o tus iniciales para ver tu perfil, ir a Ajustes, cambiar de usuario o cerrar sesión.'});steps.push({route:'dashboard',target:'.sidebar-help, .tour-help-btn',title:'Ayuda y tour guiado',text:'Vuelve a abrir este recorrido cuando quieras desde aquí.'});}
   return steps;
 }
 export function createGuidedTour({getState,getMode=()=> 'demo',onStart=()=>{},onEnd=()=>{}}){
