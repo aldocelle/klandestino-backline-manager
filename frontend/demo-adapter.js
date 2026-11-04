@@ -13,6 +13,7 @@ export const WAREHOUSES=['Bodega A','Bodega B'];
 const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
 export const defaultCrew=()=>Array.from({length:10},(_,i)=>({id:`TEC-${String(i+1).padStart(2,'0')}`,name:`Técnico ${String(i+1).padStart(2,'0')}`,active:true}));
 const jpeg=(v,max)=>{ok(typeof v==='string'&&v.length<max&&v.startsWith('data:image/jpeg;base64,'),'La foto debe ser JPEG y liviana.');ok(atob(v.slice(23)).startsWith('\xff\xd8\xff'),'Foto inválida.');return v;};
+const photos=list=>{if(list==null||list==='')return [];ok(Array.isArray(list)&&list.length<=3,'Agrega hasta 3 fotos por pieza.');return list.map(p=>jpeg(p,90000));};
 export const TM_TYPES=['load_in','stage_setup','rigging','pa_setup','lighting_setup','backline_setup','line_check','soundcheck','doors','performance','changeover','stage_reset','curfew','load_out','crew_break','meeting','custom'];
 const TM_STATUS=['pending','prep','running','done','late'],TM_EVENT_STATUS=['planning','confirmed','live','done','cancelled'];
 const stagesOf=e=>e.stages?.length?e.stages:[{id:'S1',name:'Escenario principal'}];
@@ -30,10 +31,13 @@ export function applyDemoCommand(source,cmd){
     case 'create_asset':{
       const code=text(cmd.code,60).toUpperCase(),name=text(cmd.name),category=text(cmd.category||'Accesorios',60),warehouse=text(cmd.location||'Bodega A',120);ok(WAREHOUSES.includes(warehouse),'Elige Bodega A o Bodega B.');
       ok(/^[A-Z0-9][A-Z0-9_-]{2,59}$/.test(code),'Código inválido.');ok(!s.assets.some(a=>a.code===code),'Ese código ya existe.');ok(name,'Escribe el nombre del equipo.');
-      ok(['Tambores','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');
-      s.assets.push({id:code,code,name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),location:warehouse,home:warehouse,serial:text(cmd.serial,100),kitId:null,status:'available',condition:'ok',eventId:null,note:''});
+      ok(['Tambores','Platillos','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');
+      s.assets.push({id:code,code,name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),location:warehouse,home:warehouse,serial:text(cmd.serial,100),kitId:null,status:'available',condition:'ok',eventId:null,note:'',photos:photos(cmd.photos)});
       ids=[code];summary='Equipo incorporado: '+name;break;
     }
+    case 'asset_photos':{const a=asset(cmd.assetId);a.photos=photos(cmd.photos);ids=[a.id];summary='Fotos actualizadas: '+a.name;break;}
+    case 'asset_update':{const a=asset(cmd.assetId),name=text(cmd.name),category=text(cmd.category||a.category,60);ok(name,'Escribe el nombre del equipo.');ok(['Tambores','Platillos','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');Object.assign(a,{name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),serial:text(cmd.serial,100),note:text(cmd.note,500)});ids=[a.id];summary='Detalle actualizado: '+name;break;}
+    case 'crew_profile':{const crew=structuredClone(crewOf(s)),t=crew.find(t=>t.id===cmd.crewId),name=text(cmd.name,80),email=text(cmd.email||'',190).toLowerCase();ok(t,'Técnico no encontrado.');ok(name,'Escribe el nombre del técnico.');ok(!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'Revisa el email del técnico.');ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');Object.assign(t,{name,email,phone:phone(cmd.phone||'')});if('photo' in cmd)t.photo=cmd.photo?jpeg(cmd.photo,90000):'';s.crew=crew;summary='Perfil de técnico actualizado: '+name;break;}
     case 'create_kit':{
       ids=selected(cmd);const name=text(cmd.name);ok(name,'Escribe el nombre del kit.');const kitId=uid('KIT'),locations=[];
       for(const id of ids){const a=asset(id);ok(a.status==='available','Solo puedes agrupar equipos disponibles.');for(const k of s.kits)if(k.id===a.kitId)k.assembled=false;a.kitId=kitId;locations.push(a.location);}
