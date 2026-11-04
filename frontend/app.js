@@ -110,9 +110,13 @@ function shell() {
 const heading=(eyebrow,title,text,actions='')=>`<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${esc(title)}</h1><p>${esc(text)}</p></div><div class="flex">${actions}</div></div>`;
 // Al entrar a Equipos, los botones se encienden uno tras otro para que se vean (una vez por visita).
 let introRoute='';
-function introPulse(){if(isReduced())return;const q=sel=>[...document.querySelectorAll(sel)];const rows=q('#inventoryBody [data-action=cart-group-add],#inventoryBody [data-action=cart-toggle]').slice(0,10);
-  const els=[...q('.page-heading .btn'),...q('.section-links .section-link'),...q('.category-chips button'),...q('#inventoryTabs button'),...rows].filter(e=>e.offsetParent);
-  els.forEach((el,i)=>setTimeout(()=>{el.classList.remove('intro-pulse');void el.offsetWidth;el.classList.add('intro-pulse');el.addEventListener('animationend',()=>el.classList.remove('intro-pulse'),{once:true});},120+i*55));}
+// Al entrar a Equipos: una ola de luz suave recorre botones, secciones, filtros, pestañas y las primeras filas, y vuelve.
+function introPulse(){if(isReduced())return;const q=sel=>[...document.querySelectorAll(sel)];
+  const rows=q('#inventoryBody [data-action=cart-group-add],#inventoryBody [data-action=cart-toggle]').slice(0,8);
+  const els=[...q('.page-heading .btn'),...q('.section-links .section-link'),...q('.chip-row .chip'),...q('.status-tabs button'),...rows].filter(e=>e.offsetParent&&e.animate);
+  if(!els.length)return;const step=60,dur=720,back=els.length*step+260;
+  const glow=el=>el.closest('.status-tabs')?[{offset:.45,color:'#f3cf7a',textShadow:'0 0 10px rgba(224,174,69,.75)'}]:[{offset:.45,borderColor:'#e0ae45',boxShadow:'0 0 16px rgba(224,174,69,.45)',filter:'brightness(1.18)'}];
+  els.forEach((el,i)=>{const k=glow(el),o={duration:dur,easing:'ease-in-out'};el.animate(k,{...o,delay:i*step});el.animate(k,{...o,delay:back+(els.length-1-i)*step});});}
 function render() {
   if(!state)return;
   stopCamera();
