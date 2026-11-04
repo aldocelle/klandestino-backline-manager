@@ -419,3 +419,32 @@ button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
 @media(max-width:640px){.icon-grid{grid-template-columns:repeat(3,1fr)}.hero-btns .hero-photo-btn{font-size:13px;padding:0 12px}}
 .asset-hero:not(.has-photo){height:auto;min-height:160px;padding:14px 0 12px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .asset-hero:not(.has-photo) .hero-btns{position:static;justify-content:center}
+/* Dos carros en paralelo: Carro 1 dorado, Carro 2 azul */
+.cart-tabs{display:flex;gap:8px;padding:0 20px 14px}
+.cart-tab{flex:1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#16181b;color:var(--muted);font:inherit;cursor:pointer}
+.cart-tab b{font-weight:600;color:#d7dbe0}.cart-tab small{grid-column:1/-1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-tab-count{min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:#2a2d32;font-size:12px;font-weight:700;color:#d7dbe0}
+.cart-tab.c0.active{border-color:var(--gold);background:#2a2418}.cart-tab.c0.active b{color:var(--gold)}.cart-tab.c0.active .cart-tab-count{background:var(--gold);color:#20190d}
+.cart-tab.c1.active{border-color:#6fa8ff;background:#17243a}.cart-tab.c1.active b{color:#9cc3ff}.cart-tab.c1.active .cart-tab-count{background:#6fa8ff;color:#0d1a2e}
+.cart-drawer.cart-c1 #cartTitle .icon{color:#6fa8ff}
+.cart-btn.cart-c1{border-color:#6fa8ff;color:#9cc3ff}.cart-btn.cart-c1 .cart-count{background:#6fa8ff;color:#0d1a2e}
+.cart-count.other{margin-left:4px;opacity:.9}.cart-count.other.cart-0{background:var(--gold);color:#20190d}.cart-count.other.cart-1{background:#6fa8ff;color:#0d1a2e}
+.cart-na.other-cart{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.cart-na.other-cart.cart-0{color:var(--gold);border:1px solid #e0ae4566;background:#e0ae4512}
+.cart-na.other-cart.cart-1{color:#9cc3ff;border:1px solid #6fa8ff66;background:#6fa8ff14}
+.other-cart-text.cart-0{color:var(--gold)}.other-cart-text.cart-1{color:#9cc3ff}
+.inventory-panel tr.cart-row-1>td{background-color:#6fa8ff14!important}
+.inventory-panel tr.cart-row-1>td:first-child{box-shadow:inset 3px 0 #6fa8ff}
+.inventory-panel tr.cart-row-0:not(.in-cart)>td{background-color:#e3a83d0d!important}
+.inventory-panel tr.cart-row-0:not(.in-cart)>td:first-child{box-shadow:inset 3px 0 var(--gold)}
+/* Estado: la celda completa toma el color del estado */
+td.status-cell.st-available,td.status-cell.st-returned{background-color:#163626!important}
+td.status-cell.st-reserved,td.status-cell.st-partial{background-color:#3b2f15!important}
+td.status-cell.st-out{background-color:#1a2a47!important}
+td.status-cell.st-maintenance{background-color:#43201b!important}
+td.status-cell.st-missing{background-color:#4a1c28!important}
+td.status-cell.st-none{background-color:#2c2023!important}
+td.status-cell{transition:background-color .2s}
+@media(max-width:640px){td.status-cell{border-radius:6px;padding:6px 8px!important}}
+.cart-bar.cart-c1{background:#6fa8ff;border-color:#6fa8ff;color:#0d1a2e}
+.cart-bar.cart-c1 *{color:#0d1a2e}
