@@ -3,6 +3,7 @@
 import seed from './demo-seed.json' with {type:'json'};
 const ok=(condition,message)=>{if(!condition)throw new Error(message);};
 const text=(value='',max=180)=>{ok(typeof value==='string'&&value.trim().length<=max,'Texto inválido o demasiado largo.');return value.trim();};
+const phone=(v='')=>{const t=text(v||'',40);ok(t===''||/^\+?[0-9 ()-]{6,20}$/.test(t),'Revisa el teléfono: usa solo números, espacios y +.');return t;};
 const find=(list,id)=>{const result=list.find(v=>v.id===id);ok(result,'No se encontró el registro: '+id);return result;};
 const selected=cmd=>{const ids=cmd.assetIds;ok(Array.isArray(ids)&&ids.length>0&&ids.length<=500,'Selecciona al menos un equipo.');ok(ids.every(id=>typeof id==='string'&&id.length<100)&&new Set(ids).size===ids.length,'La selección tiene códigos inválidos o repetidos.');return ids;};
 const uid=prefix=>prefix+'-'+crypto.randomUUID().replaceAll('-','').slice(0,10).toUpperCase();
@@ -48,7 +49,7 @@ export function applyDemoCommand(source,cmd){
       if(cmd.type==='create_event'){
         const name=text(cmd.name),place=text(cmd.place,200),responsible=text(cmd.responsible,120),start=text(cmd.start,30),end=text(cmd.end,30);
         ok(name&&place&&responsible,'Completa evento, destino y responsable.');ok(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(start)&&Number.isFinite(Date.parse(start))&&Date.parse(end)>Date.parse(start),'La devolución debe ser posterior a la salida.');
-        eventId=uid('EVT');e={id:eventId,name,place,responsible,start,end,vehicle:text(cmd.vehicle,120),service:text(cmd.service||'Backline',80),items:[]};s.events.push(e);
+        eventId=uid('EVT');e={id:eventId,name,place,responsible,start,end,vehicle:text(cmd.vehicle,120),driver:text(cmd.driver||'',120),responsiblePhone:phone(cmd.responsiblePhone),driverPhone:phone(cmd.driverPhone),service:text(cmd.service||'Backline',80),items:[]};s.events.push(e);
       }else{eventId=cmd.eventId;e=event(eventId);ok(Date.parse(e.end)>Date.now(),'Este evento ya terminó.');}
       for(const id of ids){const a=asset(id);a.status='reserved';a.eventId=eventId;e.items.push({assetId:id,status:'reserved',condition:'ok',note:''});}
       summary=ids.length+' equipos reservados para '+e.name;break;

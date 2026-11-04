@@ -16,9 +16,9 @@ App de bodega y logística para backline. Backend **PHP 8.2+**, almacenamiento *
 
 ## Inventario demo
 
-99 activos individuales (los kits no duplican stock):
+115 activos individuales (los kits no duplican stock):
 
-- 2 Tama Starclassic Maple doble bombo, 27 componentes cada una: 2 bombos 22” maple, caja 14” Mapex Black Panther, toms 10”, 12” y 13”, toms de piso 14” y 16”; atril de caja, 4 atriles boom, 4 rectos, 3 soportes de tom, 2 pedales de bombo, pedal doble, sillín y hi-hat con atril, varilla y clutch, cada pieza con su QR.
+- 2 Tama Starclassic Maple doble bombo, 35 componentes cada una: 2 bombos 22” maple, caja 14” Mapex Black Panther, toms 10”, 12” y 13”, toms de piso 14” y 16”; atril de caja, 4 atriles boom, 4 rectos, 3 soportes de tom, 2 pedales de bombo, pedal doble, sillín hi-hat con atril, varilla y clutch, y una funda por tambor, cada pieza con su QR.
 - 4 Marshall 1960A, 2 Ampeg SVT 8×10, 2 Kemper Profiler.
 - Atriles rectos y boom, hi-hats, clutches, micrófonos, cables y cases.
 - 2 eventos ficticios, uno con cinco equipos fuera y un atril en revisión.
@@ -56,6 +56,8 @@ Para separar un kit, la ficha agrupa los componentes en Tambores, Atriles, Hi-ha
 «Etiquetas QR» abre un centro de impresión: grupos por kit (QR general y piezas por Tambores, Atriles, Hi-hat y Pedales) y por categoría para el equipo suelto, con casilla por grupo y por pieza, atajos Todo / Solo QR de kits / Nada, tamaño pequeña, mediana o grande, y vista previa agrupada en la que cada etiqueta indica su kit o categoría. La ficha de kit tiene «Etiquetas del kit».
 
 Equipo técnico: 10 técnicos renombrables en Ajustes. Registrar una salida o una devolución exige elegir quién saca o quién recibe; queda en el historial («Responsable: …») y en cada pieza del evento («Salió con … · Recibió …»). La app recuerda el último técnico elegido en el dispositivo.
+
+Tótem de técnicos (#totem, cartel imprimible con QR en Ajustes): el técnico elige su nombre una vez en su celular y luego «Sacar a un evento», «Recibir de un evento» o «Mover entre bodegas». La cámara queda activa para escanear pieza tras pieza (el QR general de un kit agrega todas sus piezas), marca lo que no aplica y registra todo a su nombre. Las salidas guardan vehículo, conductor y teléfonos del encargado y del conductor.
 
 Hay dos bodegas, nombradas solo «Bodega A» y «Bodega B»; la app no guarda sus direcciones. Cada pieza tiene una bodega base: al volver de un evento o del taller regresa a ella. «Trasladar» (en la selección del inventario y en la ficha de kit) mueve piezas disponibles entre bodegas y queda en el historial; un kit trasladado completo sigue armado. El inventario filtra por bodega o «Fuera de bodega».
 

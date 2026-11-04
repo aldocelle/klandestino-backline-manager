@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {demoSeed,applyDemoCommand} from '../frontend/demo-adapter.js';
 let s=demoSeed();
-assert.equal(s.assets.length,99);const initial=structuredClone(s);
+assert.equal(s.assets.length,115);const initial=structuredClone(s);
 const cmd={type:'create_event',name:'Prueba estática',place:'Escenario A',responsible:'Krew QA',start:s.events[0].start,end:s.events[0].end,assetIds:['TAM-SCM-001-BD1','TAM-SCM-001-T10']};
 s=applyDemoCommand(s,cmd);const eventId=s.events.at(-1).id;
 assert.equal(s.kits[0].assembled,false);assert.equal(initial.assets[0].status,'available');
@@ -13,7 +13,7 @@ assert.equal(s.assets.find(a=>a.id==='TAM-SCM-001-T10').status,'out');
 assert.equal(s.assets.find(a=>a.id==='TAM-SCM-001-T12').status,'available');
 assert.equal(s.movements.length,4);
 let whole=applyDemoCommand(demoSeed(),{...cmd,assetIds:demoSeed().kits[0].expectedIds});
-assert.equal(whole.assets.filter(a=>a.status==='reserved').length,27);
+assert.equal(whole.assets.filter(a=>a.status==='reserved').length,35);
 whole=applyDemoCommand(whole,{type:'dispatch',responsibleId:'TEC-01',eventId:whole.events.at(-1).id,assetIds:whole.kits[0].expectedIds});
 whole=applyDemoCommand(whole,{type:'return',responsibleId:'TEC-02',eventId:whole.events.at(-1).id,assetIds:['TAM-SCM-001-BD1'],condition:'damage',note:'Golpe'});
 assert.equal(whole.assets.find(a=>a.id==='TAM-SCM-001-BD1').status,'maintenance');

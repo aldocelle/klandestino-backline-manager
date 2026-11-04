@@ -329,3 +329,43 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
 .crew-row input{min-height:40px}
 .crew-mobile{display:none}
 @media(max-width:640px){.crew-choice{grid-template-columns:1fr 1fr}.crew-mobile{display:block;color:#c8b183}}
+
+/* Teléfonos del evento */
+.tel-link{display:inline-flex;align-items:center;gap:6px;margin-top:6px;min-height:40px;color:var(--gold);font-size:14px}
+.tel-link .icon{width:15px;height:15px}
+.crew-card+.crew-card{margin-top:10px}
+.crew-card span{display:block;color:var(--muted);font-size:13px}
+
+/* Tótem de técnicos */
+.totem{max-width:640px;margin:0 auto;display:grid;gap:14px;padding-bottom:120px}
+.totem-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.totem-head h1{font-size:30px;margin:4px 0 0}
+.totem-hint{font-size:15px;color:var(--muted);margin:0}
+.totem-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.totem-actions{display:grid;gap:10px}
+.totem-card{display:grid;gap:4px;justify-items:start;text-align:left;width:100%;padding:16px;min-height:64px;border:1px solid var(--line);border-radius:12px;background:#15171a;color:var(--text);cursor:pointer;text-decoration:none}
+.totem-card .icon{width:22px;height:22px;color:var(--gold)}
+.totem-card strong{font-size:16px}.totem-card small{font-size:13px;color:var(--muted)}
+.totem-card.big{min-height:96px;padding:18px}.totem-card.big strong{font-size:19px}
+.totem-card:hover,.totem-card:focus-visible{border-color:var(--gold);background:#211d15}
+.totem-step{display:flex;align-items:center;gap:10px;font-size:15px}
+.totem-scanner .camera-stage{height:min(46vh,340px)}
+.totem-manual{display:flex;gap:8px}.totem-manual input{flex:1;min-height:46px;font-size:16px}.totem-manual .btn{min-height:46px}
+.totem-list-head strong{font-size:13px;color:var(--gold)}
+.totem-list{display:grid;gap:6px}
+.totem-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#15171a}
+.totem-row>div{flex:1;min-width:0}.totem-row strong{display:block;font-size:14px}.totem-row small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.totem-row.bad{border-color:#7a3a35;background:#211615}.totem-row.bad small{color:var(--red)}
+.totem-dmg{font-size:12px;white-space:nowrap;min-height:40px}
+.totem-empty{font-size:14px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:10px;margin:0}
+.totem-bar{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom));z-index:5}
+.totem-bar .btn{width:100%;min-height:54px;font-size:16px;box-shadow:0 10px 28px #000a}
+.totem-poster-link{justify-self:center;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.totem-poster{background:#fff;color:#111;text-align:center;padding:28px;border-radius:8px;max-width:520px;margin:0 auto}
+.totem-poster b{font-size:12px;letter-spacing:2px}.totem-poster h2{font-size:34px;margin:6px 0;color:#111}.totem-poster p{font-size:16px;color:#333;margin:0 0 12px}
+.totem-poster svg{width:100%;max-width:360px;height:auto}
+.totem-poster ol{text-align:left;font-size:16px;line-height:1.7;max-width:320px;margin:12px auto;color:#111}
+.totem-poster small{font-size:10px;color:#555;word-break:break-all}
+body[data-route=totem] .tour-invitation{display:none}
+@media(min-width:641px){.totem-bar{bottom:16px}.totem-grid{grid-template-columns:repeat(3,1fr)}}
+@media print{.totem-poster{max-width:none;padding:0}.totem-poster svg{max-width:120mm}}

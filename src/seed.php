@@ -30,6 +30,9 @@ function seed_state(): array
         ['PD1', 'Pedal de bombo 01', 'Fierros'], ['PD2', 'Pedal de bombo 02', 'Fierros'], ['DP', 'Pedal doble', 'Fierros'],
         ['ST', 'Sillín', 'Fierros'],
         ['HH', 'Atril hi-hat', 'Fierros'], ['HR', 'Varilla hi-hat', 'Accesorios'], ['CL', 'Clutch hi-hat', 'Accesorios'],
+        ['FBD1', 'Funda bombo 22” · derecho', 'Cases'], ['FBD2', 'Funda bombo 22” · izquierdo', 'Cases'], ['FSN', 'Funda caja 14”', 'Cases'],
+        ['FT10', 'Funda tom 10”', 'Cases'], ['FT12', 'Funda tom 12”', 'Cases'], ['FT13', 'Funda tom 13”', 'Cases'],
+        ['FF14', 'Funda tom de piso 14”', 'Cases'], ['FF16', 'Funda tom de piso 16”', 'Cases'],
     ];
     foreach ([1, 2] as $n) {
         $code = 'TAM-SCM-00' . $n;
@@ -40,7 +43,7 @@ function seed_state(): array
         }
         $kits[] = ['id' => $code, 'name' => 'Tama Starclassic Maple 0' . $n, 'brand' => 'Tama',
             'finish' => $n === 1 ? 'Maple Tobacco Burst' : 'Dark Mocha Fade', 'assembled' => true,
-            'expectedIds' => $ids, 'note' => 'Doble bombo 2×22” · toms 10”, 12”, 13” · piso 14”, 16” · caja Mapex Black Panther 14” · 27 piezas trazables.'];
+            'expectedIds' => $ids, 'note' => 'Doble bombo 2×22” · toms 10”, 12”, 13” · piso 14”, 16” · caja Mapex Black Panther 14” · fundas para cada tambor · 35 piezas trazables.'];
     }
     for ($n = 1; $n <= 4; $n++) $add(sprintf('MAR-1960A-%03d', $n), 'Marshall 1960A ' . sprintf('%02d', $n), 'Gabinetes', 'Marshall', '1960A · 4×12');
     for ($n = 1; $n <= 2; $n++) {

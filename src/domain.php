@@ -19,6 +19,7 @@ function home_of(array $asset): string { return in_array($asset['home'] ?? '', w
 function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['id' => sprintf('TEC-%02d', $n), 'name' => sprintf('Técnico %02d', $n), 'active' => true]; return $c; }
 function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
+function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
 function selected_ids(array $command): array {
     $ids = $command['assetIds'] ?? [];
     require_ok(is_array($ids) && count($ids) > 0 && count($ids) <= 500, 'Selecciona al menos un equipo.');
@@ -89,7 +90,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.');
                 $eventId = $newId('EVT');
                 $state['events'][] = ['id' => $eventId, 'name' => $name, 'place' => $place, 'start' => $start, 'end' => $end,
-                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'items' => []];
+                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'items' => []];
                 $ei = count($state['events']) - 1;
             } else { $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); require_ok(strtotime($state['events'][$ei]['end']) > time(), 'Este evento ya terminó.'); }
             foreach ($ids as $id) {
