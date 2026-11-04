@@ -47,6 +47,8 @@ La interfaz usa una consola de operaciones en negro/grafito, tipografía condens
 
 El tour guiado ofrece 13 pasos contextuales con las pantallas existentes, foco visual, avance/retroceso, salida y control por teclado. Se ofrece en la primera visita y puede repetirse desde Ayuda o Ajustes. No ejecuta comandos de inventario, no activa la cámara y conserva las selecciones al salir. La preferencia de bienvenida se recuerda en este navegador.
 
+En móvil, «Escanear» es el botón central de la barra inferior: abre el visor, que se activa con un toque (o solo, si el navegador ya concedió el permiso de cámara; nunca durante el tour). Tras cada lectura hay vibración breve y «Escanear otro»; un código desconocido avisa sin cortar la cámara. Usa el lector nativo `BarcodeDetector` cuando existe y jsQR como respaldo. Ajustes, Mantenimiento y Reportes quedan en el ícono de engranaje de la barra superior. Botones del escáner de 46 px y campos de 16 px para evitar el zoom automático de iOS.
+
 La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
 
 Pruebas PHP de dominio y persistencia en SQLite, generación/decodificación QR y flujo de navegador: kit → reserva parcial → despacho → devolución parcial. MySQL/MariaDB está preparado, sin afirmar una conexión al hosting final cuyas credenciales no están configuradas.

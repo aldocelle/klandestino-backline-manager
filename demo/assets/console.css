@@ -125,3 +125,53 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
 .metric-arrow{position:absolute;right:14px;bottom:13px;color:var(--gold)}
 .breakdown-row,.activity-item{transition:background-color .18s ease,color .18s ease}
 .breakdown-row:hover,.breakdown-row:focus-visible,.activity-item:hover,.activity-item:focus-visible{background:var(--raised);color:var(--text)}
+
+/* Escáner accesible: visor tocable, botón central móvil y objetivos táctiles de 44 px */
+.camera-start{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;padding:0 0 46px;background:transparent;border:0;color:#f4e4c3;cursor:pointer;font:inherit}
+.camera-start .icon{width:30px;height:30px;padding:13px;box-sizing:content-box;border-radius:50%;background:var(--gold);color:#141414;box-shadow:0 6px 22px #0009}
+.camera-start strong{font-size:12px;letter-spacing:.4px;text-shadow:0 1px 6px #000}
+.camera-start:focus-visible{outline:2px solid #ffe1a3;outline-offset:-6px}
+.camera-live .camera-start{display:none}
+.scanner-console .camera-stage:not(.camera-live) .camera-frame,.scanner-console .camera-stage:not(.camera-live) .scan-label{opacity:.55}
+.scanner-console .camera-stage:not(.camera-live) .scan-label{display:none}
+.scan-stop-btn{display:none!important}
+.scanner-console:has(.camera-live) .scan-stop-btn{display:inline-flex!important}
+.scanner-console:has(.camera-live) .scan-start-btn{display:none!important}
+.scan-again .icon{width:16px;height:16px}
+.top-right>a.mobile-more-btn{display:none}
+@media(max-width:640px){
+  .top-right>a.mobile-more-btn{display:grid;width:40px;height:40px}
+  .top-right>a.mobile-more-btn.active{color:var(--gold);border-color:#9f7838}
+  .top-right>.icon-btn{width:40px;height:40px}
+  .mobile-nav{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px 4px max(10px,env(safe-area-inset-bottom))}
+  .mobile-nav a{font-size:10px;min-height:46px;justify-content:flex-end;gap:5px}
+  .mobile-nav .icon{width:22px;height:22px}
+  .mobile-nav a.mobile-scan-fab{color:#f4e4c3;font-weight:600}
+  .mobile-nav a.mobile-scan-fab:before{display:none}
+  .fab-ring{display:grid;place-items:center;width:58px;height:58px;margin-top:-30px;border-radius:50%;background:linear-gradient(160deg,#f0c060,#d89d33);color:#141414;border:4px solid #0f1012;box-shadow:0 6px 18px #000a,0 0 0 1px #9f7838}
+  .fab-ring .icon{width:26px;height:26px}
+  .mobile-nav a.mobile-scan-fab.active .fab-ring{box-shadow:0 6px 18px #000a,0 0 0 2px #ffe1a3}
+  .mobile-nav a.mobile-scan-fab:active .fab-ring{transform:scale(.94)}
+  .content{padding-bottom:110px}
+  body[data-route=scan] .scanner-console .camera-stage{height:min(58vh,420px)}
+  body[data-route=scan] .scanner-console .camera-frame{width:200px;height:200px}
+  .camera-start strong{font-size:15px}
+  .scanner-controls{display:grid;grid-template-columns:1fr 1fr;padding:12px;gap:8px}
+  .scanner-controls .btn{font-size:13px;min-height:46px;padding:10px 12px;white-space:normal}
+  .scanner-waiting{padding:14px 18px 4px}
+  .scanner-waiting>.scan-check{display:none}
+  .scanner-waiting h2{font-size:18px}
+  .scanner-waiting p{font-size:13px}
+  .scanner-help{font-size:12px;line-height:1.5}
+  .scan-next{display:grid;gap:8px}
+  .scan-next .btn,.scan-next>.primary{font-size:14px;min-height:46px;width:100%}
+  .identified-equipment h2{font-size:15px}
+  .scan-side>.panel p{font-size:13px}
+  #scanCode,.kit-lookup input,input,select,textarea{font-size:16px}
+  .kit-scanner-buttons .btn{min-height:44px;font-size:13px}
+  body[data-route=scan] .tour-invitation{display:none}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav a.mobile-scan-fab:active .fab-ring{transform:none}}
+@media print{.camera-start{display:none!important}}
+#scanResult{scroll-margin-top:76px}
+.camera-stage{scroll-margin-top:72px}
