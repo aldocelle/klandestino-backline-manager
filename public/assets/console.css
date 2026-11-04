@@ -369,3 +369,59 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
 body[data-route=totem] .tour-invitation{display:none}
 @media(min-width:641px){.totem-bar{bottom:16px}.totem-grid{grid-template-columns:repeat(3,1fr)}}
 @media print{.totem-poster{max-width:none;padding:0}.totem-poster svg{max-width:120mm}}
+
+/* Fotos de técnicos */
+.tech-avatar{display:inline-grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;object-fit:cover;background:#2a2316;color:var(--gold);font-weight:700;font-size:13px;border:1px solid #5d4a2a}
+.tech-avatar.sm{width:28px;height:28px;font-size:11px}.tech-avatar.md{width:48px;height:48px;font-size:16px}.tech-avatar.lg{width:64px;height:64px;font-size:20px}
+.totem-card.tech{justify-items:center;text-align:center}
+.totem-head{flex-wrap:wrap}.totem-hello{flex:1;min-width:0}
+.totem-me{display:grid;justify-items:center;gap:4px;cursor:pointer;font-size:11px;color:#c8b183}
+.crew-row{grid-template-columns:36px 60px minmax(0,1fr) auto}
+.crew-photo{cursor:pointer;display:grid;place-items:center}
+/* Informes de daño y faltantes */
+.issues-section{margin-bottom:22px;display:grid;gap:12px}
+.issues-section small{color:var(--muted)}
+.issue-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.issue-card{overflow:hidden;display:grid}.issue-card.closed{opacity:.7}
+.issue-photo{width:100%;height:160px;object-fit:cover;display:block}
+.issue-body{padding:14px;display:grid;gap:8px}.issue-body h3{font-size:15px;margin:0}.issue-body p{font-size:13px;color:var(--muted);margin:0}
+.issue-by{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.kind-choice{border:0;padding:0;margin:0 0 6px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kind-choice legend{font-size:15px;font-weight:600;margin-bottom:10px;padding:0;color:var(--text)}
+.kind-choice .check-label{display:flex;align-items:flex-start;gap:10px;padding:12px;min-height:64px;border:1px solid var(--line);border-radius:10px;background:#15171a;cursor:pointer}
+.kind-choice .check-label:has(input:checked){border-color:var(--gold);background:#2a2316}
+.kind-choice input{width:18px;height:18px;margin:2px 0 0;flex:none;accent-color:var(--gold)}
+.kind-choice strong{display:block;font-size:14px;color:var(--text)}.kind-choice small{display:block;font-size:12px;color:var(--muted);line-height:1.4}
+.issue-pieces{display:grid;gap:4px;margin:12px 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+.issue-pieces small{color:var(--muted)}.issue-pieces em{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted)}
+.crew-choice .check-label .tech-avatar{margin-left:-2px}
+.issue-report{background:#fff;color:#111;padding:28px;border-radius:8px;display:grid;gap:14px}
+.issue-report header{border-bottom:2px solid #111;padding-bottom:10px}.issue-report header b{font-size:11px;letter-spacing:2px}.issue-report h2{color:#111;font-size:26px;margin:4px 0}.issue-report header span{font-size:12px;color:#444}
+.issue-report-who{display:flex;align-items:center;gap:14px}.issue-report-who small{display:block;font-size:11px;color:#555}.issue-report-who strong{font-size:17px;color:#111}.issue-report-who span{display:block;font-size:12px;color:#444}
+.issue-report table{width:100%;border-collapse:collapse;font-size:12px}.issue-report th,.issue-report td{border:1px solid #ccc;padding:6px 8px;text-align:left;color:#111;background:#fff}
+.issue-report h3{font-size:14px;margin:6px 0 0;color:#111}.issue-report p{color:#222;margin:0;font-size:13px}
+.issue-report img:not(.tech-avatar){max-width:100%;max-height:340px;object-fit:contain;border:1px solid #ccc}
+.issue-report footer{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px}.issue-report footer div{border-top:1px solid #111;padding-top:6px;font-size:11px;color:#444;text-align:center}
+@media(max-width:640px){.kind-choice{grid-template-columns:1fr}.issue-report{padding:16px}}
+@media print{.issue-report{padding:0}}
+
+/* Pantalla de descanso del tótem */
+.totem-saver{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));cursor:pointer;animation:saver-in .6s ease both;overflow:hidden}
+.totem-saver:focus{outline:none}
+.totem-saver img{flex:1 1 auto;min-height:0;max-width:100%;max-height:68vh;object-fit:contain;filter:drop-shadow(0 0 40px #ff1a1a33)}
+.saver-time{flex:none;display:grid;justify-items:center;gap:1vh}
+.seg-clock{display:flex;align-items:center;gap:clamp(6px,1.4vw,14px);height:clamp(70px,14vh,170px)}
+.seg-digit{height:100%;width:auto;overflow:visible}
+.seg-digit .on{fill:#ff1f1f;filter:drop-shadow(0 0 4px #ff2a2a) drop-shadow(0 0 14px #ff000099)}
+.seg-digit .off{fill:#2a0505}
+.seg-colon{display:grid;gap:clamp(14px,4vh,40px);padding:0 clamp(2px,.6vw,8px)}
+.seg-colon i{display:block;width:clamp(9px,1.6vh,18px);aspect-ratio:1;background:#ff1f1f;box-shadow:0 0 8px #ff2a2a,0 0 18px #ff000099;transform:skewX(-6deg)}
+.seg-colon.dim i{background:#3a0707;box-shadow:none}
+.saver-date{font:600 clamp(13px,2.2vh,22px)/1.2 ui-monospace,Menlo,monospace;letter-spacing:.3em;text-transform:uppercase;color:#ff3b3b;text-shadow:0 0 10px #ff000088}
+.saver-hint{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#6b2a2a;animation:saver-pulse 2.4s ease-in-out infinite}
+.totem-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+@media(orientation:landscape) and (max-height:700px){.totem-saver{flex-direction:row;gap:4vw}.totem-saver img{max-height:92vh;max-width:45vw}.seg-clock{height:clamp(70px,24vh,200px)}}
+@keyframes saver-in{from{opacity:0}to{opacity:1}}
+@keyframes saver-pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.totem-saver,.saver-hint{animation:none}}
+@media print{.totem-saver{display:none!important}}

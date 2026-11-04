@@ -12,6 +12,7 @@ const isAvailable=a=>a.status==='available'&&a.condition==='ok';
 export const WAREHOUSES=['Bodega A','Bodega B'];
 const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
 export const defaultCrew=()=>Array.from({length:10},(_,i)=>({id:`TEC-${String(i+1).padStart(2,'0')}`,name:`Técnico ${String(i+1).padStart(2,'0')}`,active:true}));
+const jpeg=(v,max)=>{ok(typeof v==='string'&&v.length<max&&v.startsWith('data:image/jpeg;base64,'),'La foto debe ser JPEG y liviana.');ok(atob(v.slice(23)).startsWith('\xff\xd8\xff'),'Foto inválida.');return v;};
 const crewOf=s=>Array.isArray(s.crew)&&s.crew.length?s.crew:defaultCrew();
 const crewName=(s,id)=>{const t=crewOf(s).find(t=>t.id===id&&t.active!==false);ok(t,'Elige el técnico responsable.');return t.name;};
 export function demoSeed(){
@@ -79,6 +80,15 @@ export function applyDemoCommand(source,cmd){
       const crew=structuredClone(crewOf(s)),name=text(cmd.name,80),t=crew.find(t=>t.id===cmd.crewId);ok(name,'Escribe el nombre del técnico.');ok(t,'Técnico no encontrado.');
       ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');t.name=name;s.crew=crew;summary='Equipo técnico actualizado: '+name;break;
     }
+    case 'crew_photo':{const crew=structuredClone(crewOf(s)),t=crew.find(t=>t.id===cmd.crewId);ok(t,'Técnico no encontrado.');t.photo=cmd.photo?jpeg(cmd.photo,90000):'';s.crew=crew;summary='Foto de técnico actualizada: '+t.name;break;}
+    case 'report_issue':{
+      ids=selected(cmd);ok(ids.length<=60,'Reporta hasta 60 piezas por informe.');const kind=cmd.kind;ok(['damage','missing'].includes(kind),'Elige si es daño o faltante.');note=text(cmd.note,1500);ok(note.length>=3,'Describe el daño o faltante.');by=crewName(s,cmd.responsibleId);
+      const photo=cmd.photo?jpeg(cmd.photo,200000):'';let issueEvent=null;
+      for(const id of ids){const a=asset(id);issueEvent=issueEvent??a.eventId;if(a.status==='available'){if(kind==='damage'){a.status='maintenance';a.condition='damage';a.location='Taller';}else{a.status='missing';a.condition='review';}}a.note=(kind==='damage'?'Daño: ':'Faltante: ')+note;}
+      const issueId=uid('INF');eventId=issueEvent;s.issues=s.issues||[];s.issues.unshift({id:issueId,at:new Date().toISOString(),kind,assetIds:ids,note,photo,by,byId:cmd.responsibleId,eventId:issueEvent,status:'open',actor:'Operador demo'});
+      summary=(kind==='damage'?'Informe de daño ':'Informe de faltante ')+issueId+': '+ids.length+' piezas · Responsable: '+by;break;
+    }
+    case 'issue_close':{s.issues=s.issues||[];const i=find(s.issues,cmd.issueId);ok(i.status==='open','El informe ya está cerrado.');i.status='closed';i.closedAt=new Date().toISOString();i.closedBy='Operador demo';i.resolution=text(cmd.note||'',500);ids=i.assetIds;summary='Informe cerrado: '+i.id;break;}
     case 'transfer':{
       ids=selected(cmd);const to=text(cmd.warehouse,40);note=text(cmd.note||'',500);ok(WAREHOUSES.includes(to),'Elige Bodega A o Bodega B.');
       for(const id of ids){const a=asset(id);ok(isAvailable(a),a.name+' no está disponible en bodega; no se puede trasladar.');a.location=to;a.home=to;}

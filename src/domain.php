@@ -20,6 +20,7 @@ function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['
 function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
+function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
 function selected_ids(array $command): array {
     $ids = $command['assetIds'] ?? [];
     require_ok(is_array($ids) && count($ids) > 0 && count($ids) <= 500, 'Selecciona al menos un equipo.');
@@ -142,6 +143,29 @@ function apply_command(array $state, array $cmd, string $actor): array {
             foreach ($crew as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un técnico con ese nombre.');
             foreach ($crew as &$t) if ($t['id'] === $tid) { $t['name'] = $name; $found = true; } unset($t);
             require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Equipo técnico actualizado: ' . $name; break;
+        case 'crew_photo':
+            $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $photo = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000); $found = false;
+            foreach ($crew as &$t) if ($t['id'] === $tid) { $t['photo'] = $photo; $found = true; $name = $t['name']; } unset($t);
+            require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Foto de técnico actualizada: ' . $name; break;
+        case 'report_issue':
+            $ids = selected_ids($cmd); require_ok(count($ids) <= 60, 'Reporta hasta 60 piezas por informe.'); $kind = $cmd['kind'] ?? '';
+            require_ok(in_array($kind, ['damage', 'missing'], true), 'Elige si es daño o faltante.'); $note = clean_text($cmd['note'] ?? '', 1500);
+            require_ok(strlen($note) >= 3, 'Describe el daño o faltante.'); $by = crew_name($state, $cmd['responsibleId'] ?? '');
+            $photo = empty($cmd['photo']) ? '' : clean_jpeg($cmd['photo'], 200000); $issueEvent = null;
+            foreach ($ids as $id) {
+                $ai = entity_index($state['assets'], $id); $a = &$state['assets'][$ai]; $issueEvent = $issueEvent ?? $a['eventId'];
+                if ($a['status'] === 'available') { if ($kind === 'damage') { $a['status'] = 'maintenance'; $a['condition'] = 'damage'; $a['location'] = 'Taller'; } else { $a['status'] = 'missing'; $a['condition'] = 'review'; } }
+                $a['note'] = ($kind === 'damage' ? 'Daño: ' : 'Faltante: ') . $note; unset($a);
+            }
+            $issueId = $newId('INF'); $eventId = $issueEvent;
+            $state['issues'] = $state['issues'] ?? [];
+            array_unshift($state['issues'], ['id' => $issueId, 'at' => date(DATE_ATOM), 'kind' => $kind, 'assetIds' => $ids, 'note' => $note, 'photo' => $photo, 'by' => $by, 'byId' => $cmd['responsibleId'], 'eventId' => $issueEvent, 'status' => 'open', 'actor' => $actor]);
+            $summary = ($kind === 'damage' ? 'Informe de daño ' : 'Informe de faltante ') . $issueId . ': ' . count($ids) . ' piezas · Responsable: ' . $by; break;
+        case 'issue_close':
+            $iid = clean_text($cmd['issueId'] ?? '', 40); $state['issues'] = $state['issues'] ?? []; $ii = entity_index($state['issues'], $iid);
+            require_ok($state['issues'][$ii]['status'] === 'open', 'El informe ya está cerrado.'); $note = clean_text($cmd['note'] ?? '', 500);
+            $state['issues'][$ii]['status'] = 'closed'; $state['issues'][$ii]['closedAt'] = date(DATE_ATOM); $state['issues'][$ii]['closedBy'] = $actor; $state['issues'][$ii]['resolution'] = $note;
+            $ids = $state['issues'][$ii]['assetIds']; $summary = 'Informe cerrado: ' . $iid; break;
         case 'transfer':
             $ids = selected_ids($cmd); $to = clean_text($cmd['warehouse'] ?? '', 40); $note = clean_text($cmd['note'] ?? '', 500);
             require_ok(in_array($to, warehouses(), true), 'Elige Bodega A o Bodega B.');
