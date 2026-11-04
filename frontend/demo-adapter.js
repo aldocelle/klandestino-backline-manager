@@ -13,6 +13,10 @@ export const WAREHOUSES=['Bodega A','Bodega B'];
 const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
 export const defaultCrew=()=>Array.from({length:10},(_,i)=>({id:`TEC-${String(i+1).padStart(2,'0')}`,name:`Técnico ${String(i+1).padStart(2,'0')}`,active:true}));
 const jpeg=(v,max)=>{ok(typeof v==='string'&&v.length<max&&v.startsWith('data:image/jpeg;base64,'),'La foto debe ser JPEG y liviana.');ok(atob(v.slice(23)).startsWith('\xff\xd8\xff'),'Foto inválida.');return v;};
+export const TM_TYPES=['load_in','stage_setup','rigging','pa_setup','lighting_setup','backline_setup','line_check','soundcheck','doors','performance','changeover','stage_reset','curfew','load_out','crew_break','meeting','custom'];
+const TM_STATUS=['pending','prep','running','done','late'],TM_EVENT_STATUS=['planning','confirmed','live','done','cancelled'];
+const stagesOf=e=>e.stages?.length?e.stages:[{id:'S1',name:'Escenario principal'}];
+const dtOk=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)&&Number.isFinite(Date.parse(v));
 const crewOf=s=>Array.isArray(s.crew)&&s.crew.length?s.crew:defaultCrew();
 const crewName=(s,id)=>{const t=crewOf(s).find(t=>t.id===id&&t.active!==false);ok(t,'Elige el técnico responsable.');return t.name;};
 export function demoSeed(){
@@ -75,6 +79,23 @@ export function applyDemoCommand(source,cmd){
       ids=selected(cmd);const ready=cmd.ready===true;note=text(cmd.note,1500);
       for(const id of ids){const a=asset(id);ok(ready?a.status==='maintenance':a.status==='available','El equipo no admite ese cambio de mantenimiento.');a.status=ready?'available':'maintenance';a.condition=ready?'ok':'review';a.location=ready?homeOf(a):'Taller';a.note=note;}
       summary=ready?'Revisión técnica completada':'Equipos enviados a mantenimiento';break;
+    }
+    case 'event_update':{
+      const e=event(cmd.eventId);eventId=e.id;const status=cmd.status||e.status||'planning';ok(TM_EVENT_STATUS.includes(status),'Estado de evento inválido.');
+      const sm=text(cmd.stageManagerId||'',20);if(sm)crewName(s,sm);const raw=cmd.stages||stagesOf(e);ok(Array.isArray(raw)&&raw.length>=1&&raw.length<=8,'Define entre 1 y 8 escenarios.');
+      const seen=new Set(),stages=raw.map(st=>{const id=text(st?.id||'',4),name=text(st?.name||'',60);ok(/^S[0-9]{1,2}$/.test(id)&&!seen.has(id)&&name,'Revisa los nombres de los escenarios.');seen.add(id);return {id,name};});
+      for(const a of e.timing||[])ok(seen.has(a.stageId),'Hay actividades en un escenario que quieres quitar. Muévelas antes.');
+      Object.assign(e,{client:text(cmd.client||'',160),address:text(cmd.address||'',200),status,stageManagerId:sm,stages,notes:text(cmd.notes||'',3000)});summary='Datos del evento actualizados: '+e.name;break;
+    }
+    case 'timing_save':{
+      const e=event(cmd.eventId);eventId=e.id;const acts=cmd.activities;ok(Array.isArray(acts)&&acts.length<=200,'El cronograma admite hasta 200 actividades.');
+      const stageIds=stagesOf(e).map(x=>x.id),prev=Object.fromEntries((e.timing||[]).map(a=>[a.id,a])),seen=new Set();
+      const out=acts.map(a=>{ok(a&&typeof a==='object','Actividad inválida.');const id=text(a.id||'',16);ok(/^A[0-9A-Z]{2,14}$/.test(id)&&!seen.has(id),'Identificador de actividad inválido.');seen.add(id);
+        ok(TM_TYPES.includes(a.type),'Tipo de actividad inválido.');const title=text(a.title||'',120);ok(title,'Cada actividad necesita un nombre.');ok(stageIds.includes(a.stageId),'Escenario inválido en «'+title+'».');
+        ok(dtOk(a.start)&&dtOk(a.end),'Revisa las horas de «'+title+'».');const mins=(Date.parse(a.end)-Date.parse(a.start))/60000;ok(mins>0&&mins<=1440,'«'+title+'» debe terminar después de empezar (máximo 24 h).');
+        const resp=text(a.responsibleId||'',20);if(resp)crewName(s,resp);const status=a.status||'pending';ok(TM_STATUS.includes(status),'Estado de actividad inválido.');
+        return {id,type:a.type,title,stageId:a.stageId,start:a.start,end:a.end,responsibleId:resp,artist:text(a.artist||'',120),description:text(a.description||'',1000),status,actualStart:prev[id]?.actualStart??null,actualEnd:prev[id]?.actualEnd??null};});
+      out.sort((x,y)=>x.start.localeCompare(y.start)||x.end.localeCompare(y.end));e.timing=out;summary='Run of Show actualizado: '+out.length+' actividades · '+e.name;break;
     }
     case 'crew_rename':{
       const crew=structuredClone(crewOf(s)),name=text(cmd.name,80),t=crew.find(t=>t.id===cmd.crewId);ok(name,'Escribe el nombre del técnico.');ok(t,'Técnico no encontrado.');

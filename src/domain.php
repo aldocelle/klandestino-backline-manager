@@ -21,6 +21,12 @@ function crew_list(array $state): array { return isset($state['crew']) && is_arr
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
+/** Event Timing: tipos y estados del Run of Show. */
+function timing_types(): array { return ['load_in','stage_setup','rigging','pa_setup','lighting_setup','backline_setup','line_check','soundcheck','doors','performance','changeover','stage_reset','curfew','load_out','crew_break','meeting','custom']; }
+function timing_statuses(): array { return ['pending','prep','running','done','late']; }
+function timing_event_statuses(): array { return ['planning','confirmed','live','done','cancelled']; }
+function event_stages(array $e): array { return !empty($e['stages']) ? $e['stages'] : [['id' => 'S1', 'name' => 'Escenario principal']]; }
+function valid_local_dt(mixed $v): bool { return is_string($v) && (bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $v) && strtotime($v) !== false; }
 function selected_ids(array $command): array {
     $ids = $command['assetIds'] ?? [];
     require_ok(is_array($ids) && count($ids) > 0 && count($ids) <= 500, 'Selecciona al menos un equipo.');
@@ -137,6 +143,39 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $a['location'] = $ready ? home_of($a) : 'Taller'; $a['note'] = $note; unset($a);
             }
             $summary = $ready ? 'Revisión técnica completada' : 'Equipos enviados a mantenimiento'; break;
+        case 'event_update':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
+            $status = $cmd['status'] ?? ($e['status'] ?? 'planning'); require_ok(in_array($status, timing_event_statuses(), true), 'Estado de evento inválido.');
+            $sm = clean_text($cmd['stageManagerId'] ?? '', 20); if ($sm !== '') crew_name($state, $sm);
+            $raw = $cmd['stages'] ?? (event_stages($e)); require_ok(is_array($raw) && count($raw) >= 1 && count($raw) <= 8, 'Define entre 1 y 8 escenarios.');
+            $stages = []; $seen = [];
+            foreach ($raw as $st) { require_ok(is_array($st), 'Escenario inválido.'); $sid = clean_text($st['id'] ?? '', 4); $sname = clean_text($st['name'] ?? '', 60);
+                require_ok((bool)preg_match('/^S[0-9]{1,2}$/', $sid) && !isset($seen[$sid]) && $sname !== '', 'Revisa los nombres de los escenarios.'); $seen[$sid] = true; $stages[] = ['id' => $sid, 'name' => $sname]; }
+            foreach (($e['timing'] ?? []) as $act) require_ok(isset($seen[$act['stageId']]), 'Hay actividades en un escenario que quieres quitar. Muévelas antes.');
+            $e['client'] = clean_text($cmd['client'] ?? '', 160); $e['address'] = clean_text($cmd['address'] ?? '', 200); $e['status'] = $status;
+            $e['stageManagerId'] = $sm; $e['stages'] = $stages; $e['notes'] = clean_text($cmd['notes'] ?? '', 3000);
+            $summary = 'Datos del evento actualizados: ' . $e['name']; unset($e); break;
+        case 'timing_save':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
+            $acts = $cmd['activities'] ?? null; require_ok(is_array($acts) && count($acts) <= 200, 'El cronograma admite hasta 200 actividades.');
+            $stageIds = array_column(event_stages($e), 'id'); $prev = []; foreach (($e['timing'] ?? []) as $p) $prev[$p['id']] = $p; $out = []; $ids = [];
+            foreach ($acts as $a) {
+                require_ok(is_array($a), 'Actividad inválida.'); $aid = clean_text($a['id'] ?? '', 16);
+                require_ok((bool)preg_match('/^A[0-9A-Z]{2,14}$/', $aid) && !in_array($aid, $ids, true), 'Identificador de actividad inválido.'); $ids[] = $aid;
+                $type = $a['type'] ?? ''; require_ok(in_array($type, timing_types(), true), 'Tipo de actividad inválido.');
+                $title = clean_text($a['title'] ?? '', 120); require_ok($title !== '', 'Cada actividad necesita un nombre.');
+                $stage = $a['stageId'] ?? ''; require_ok(in_array($stage, $stageIds, true), 'Escenario inválido en «' . $title . '».');
+                $start = $a['start'] ?? ''; $end = $a['end'] ?? '';
+                require_ok(valid_local_dt($start) && valid_local_dt($end), 'Revisa las horas de «' . $title . '».');
+                $mins = (strtotime($end) - strtotime($start)) / 60; require_ok($mins > 0 && $mins <= 1440, '«' . $title . '» debe terminar después de empezar (máximo 24 h).');
+                $resp = clean_text($a['responsibleId'] ?? '', 20); if ($resp !== '') crew_name($state, $resp);
+                $st = $a['status'] ?? 'pending'; require_ok(in_array($st, timing_statuses(), true), 'Estado de actividad inválido.');
+                $out[] = ['id' => $aid, 'type' => $type, 'title' => $title, 'stageId' => $stage, 'start' => $start, 'end' => $end, 'responsibleId' => $resp,
+                    'artist' => clean_text($a['artist'] ?? '', 120), 'description' => clean_text($a['description'] ?? '', 1000), 'status' => $st,
+                    'actualStart' => $prev[$aid]['actualStart'] ?? null, 'actualEnd' => $prev[$aid]['actualEnd'] ?? null];
+            }
+            usort($out, fn($x, $y) => strcmp($x['start'], $y['start']) ?: strcmp($x['end'], $y['end']));
+            $e['timing'] = $out; $summary = 'Run of Show actualizado: ' . count($out) . ' actividades · ' . $e['name']; unset($e); break;
         case 'crew_rename':
             $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $name = clean_text($cmd['name'] ?? '', 80);
             require_ok($name !== '', 'Escribe el nombre del técnico.'); $found = false;
