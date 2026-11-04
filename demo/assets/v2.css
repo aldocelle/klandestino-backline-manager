@@ -388,3 +388,7 @@ body .crew-row.crew-row-btn{display:flex;align-items:center;gap:12px;width:100%;
 .event-poster-thumb + div{flex:1;min-width:0}
 .poster-full{display:block;max-width:100%;max-height:75dvh;margin:auto;border-radius:8px}
 @media(max-width:640px){.event-card-poster{margin:0 -19px 14px;height:150px}.event-poster-thumb{width:64px}.photo-add.poster-add,.poster-tile{width:120px}}
+.event-poster-thumb.is-default{opacity:.85}
+button.event-poster-thumb.is-default{cursor:pointer}
+button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
+.event-card-poster.is-default img{object-position:center 55%}

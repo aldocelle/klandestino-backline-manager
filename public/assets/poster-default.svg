@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Afiche genérico de evento">
+  <!-- Afiche por defecto · obra original de Klandestino Backline Manager, libre de uso -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1712"/>
+      <stop offset=".55" stop-color="#121417"/>
+      <stop offset="1" stop-color="#0b0c0e"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3c86e" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f3c86e" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".62" r=".5">
+      <stop offset="0" stop-color="#e0ae45" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#e0ae45" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="none"/><circle cx="1" cy="1" r=".6" fill="#fff" opacity=".035"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg)"/>
+  <!-- haces de luz -->
+  <g style="mix-blend-mode:screen">
+    <polygon points="120,0 160,0 330,520 210,520" fill="url(#beam)" opacity=".8"/>
+    <polygon points="440,0 480,0 390,520 270,520" fill="url(#beam)" opacity=".8"/>
+    <polygon points="285,0 315,0 360,520 240,520" fill="url(#beam)" opacity=".45"/>
+  </g>
+  <!-- truss -->
+  <g stroke="#3a3f46" stroke-width="3" fill="none">
+    <line x1="40" y1="34" x2="560" y2="34"/><line x1="40" y1="56" x2="560" y2="56"/>
+    <path d="M40 34 L66 56 L92 34 L118 56 L144 34 L170 56 L196 34 L222 56 L248 34 L274 56 L300 34 L326 56 L352 34 L378 56 L404 34 L430 56 L456 34 L482 56 L508 34 L534 56 L560 34"/>
+  </g>
+  <g fill="#262a30"><rect x="126" y="56" width="28" height="22" rx="4"/><rect x="286" y="56" width="28" height="22" rx="4"/><rect x="446" y="56" width="28" height="22" rx="4"/></g>
+  <g fill="#f7dc9c"><circle cx="140" cy="80" r="6"/><circle cx="300" cy="80" r="6"/><circle cx="460" cy="80" r="6"/></g>
+  <!-- escenario y kit -->
+  <ellipse cx="300" cy="500" rx="300" ry="120" fill="url(#glow)"/>
+  <g fill="#0a0b0d">
+    <!-- amplificadores -->
+    <rect x="58" y="380" width="92" height="140" rx="5"/><rect x="58" y="352" width="92" height="30" rx="4"/>
+    <rect x="450" y="380" width="92" height="140" rx="5"/><rect x="450" y="352" width="92" height="30" rx="4"/>
+    <!-- bombo -->
+    <circle cx="300" cy="462" r="62"/>
+    <!-- toms -->
+    <ellipse cx="252" cy="384" rx="30" ry="22"/><ellipse cx="348" cy="384" rx="30" ry="22"/>
+    <rect x="378" y="420" width="62" height="78" rx="6"/>
+    <!-- platillos -->
+    <rect x="186" y="318" width="4" height="200"/><ellipse cx="188" cy="318" rx="46" ry="6"/>
+    <rect x="414" y="300" width="4" height="200"/><ellipse cx="416" cy="300" rx="52" ry="6"/>
+    <rect x="152" y="380" width="4" height="140"/><ellipse cx="154" cy="380" rx="30" ry="5"/>
+    <!-- tarima -->
+    <rect x="0" y="520" width="600" height="280"/>
+  </g>
+  <circle cx="300" cy="462" r="46" fill="none" stroke="#e0ae45" stroke-opacity=".5" stroke-width="2"/>
+  <text x="300" y="470" text-anchor="middle" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="700" font-size="26" fill="#e0ae45" fill-opacity=".8">K</text>
+  <line x1="0" y1="520" x2="600" y2="520" stroke="#e0ae45" stroke-opacity=".45" stroke-width="2"/>
+  <!-- texto -->
+  <text x="300" y="620" text-anchor="middle" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="700" font-size="64" letter-spacing="6" fill="#f2efe8">EN VIVO</text>
+  <text x="300" y="664" text-anchor="middle" font-family="'DM Sans',Arial,sans-serif" font-size="17" letter-spacing="7" fill="#e0ae45">KLANDESTINO · BACKLINE</text>
+  <rect x="270" y="700" width="60" height="3" fill="#e0ae45"/>
+  <rect width="600" height="800" fill="url(#grain)"/>
+</svg>
