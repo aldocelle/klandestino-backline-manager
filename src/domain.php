@@ -20,6 +20,7 @@ function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['
 function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
+function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
 /** Event Timing: tipos y estados del Run of Show. */
 function timing_types(): array { return ['load_in','stage_setup','rigging','pa_setup','lighting_setup','backline_setup','line_check','soundcheck','doors','performance','changeover','stage_reset','curfew','load_out','crew_break','meeting','custom']; }
@@ -49,8 +50,11 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $state['assets'][] = ['id' => $code, 'code' => $code, 'name' => $name, 'category' => $category,
                 'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
                 'location' => $warehouse, 'home' => $warehouse, 'serial' => clean_text($cmd['serial'] ?? '', 100),
-                'kitId' => null, 'status' => 'available', 'condition' => 'ok', 'eventId' => null, 'note' => ''];
+                'kitId' => null, 'status' => 'available', 'condition' => 'ok', 'eventId' => null, 'note' => '', 'photos' => clean_photos($cmd['photos'] ?? [])];
             $ids = [$code]; $summary = 'Equipo incorporado: ' . $name; break;
+        case 'asset_photos':
+            $ai = entity_index($state['assets'], (string)($cmd['assetId'] ?? '')); $state['assets'][$ai]['photos'] = clean_photos($cmd['photos'] ?? []);
+            $ids = [$state['assets'][$ai]['id']]; $summary = 'Fotos actualizadas: ' . $state['assets'][$ai]['name']; break;
         case 'create_kit':
             $ids = selected_ids($cmd); $name = clean_text($cmd['name'] ?? '');
             require_ok($name !== '', 'Escribe el nombre del kit.');
@@ -182,6 +186,17 @@ function apply_command(array $state, array $cmd, string $actor): array {
             foreach ($crew as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un técnico con ese nombre.');
             foreach ($crew as &$t) if ($t['id'] === $tid) { $t['name'] = $name; $found = true; } unset($t);
             require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Equipo técnico actualizado: ' . $name; break;
+        case 'crew_profile':
+            $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $name = clean_text($cmd['name'] ?? '', 80);
+            require_ok($name !== '', 'Escribe el nombre del técnico.');
+            $email = strtolower(clean_text($cmd['email'] ?? '', 190)); require_ok($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) !== false, 'Revisa el email del técnico.');
+            $phone = clean_phone($cmd['phone'] ?? ''); $found = false;
+            foreach ($crew as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un técnico con ese nombre.');
+            foreach ($crew as &$t) if ($t['id'] === $tid) {
+                $t['name'] = $name; $t['email'] = $email; $t['phone'] = $phone; $found = true;
+                if (array_key_exists('photo', $cmd)) $t['photo'] = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000);
+            } unset($t);
+            require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Perfil de técnico actualizado: ' . $name; break;
         case 'crew_photo':
             $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $photo = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000); $found = false;
             foreach ($crew as &$t) if ($t['id'] === $tid) { $t['photo'] = $photo; $found = true; $name = $t['name']; } unset($t);
