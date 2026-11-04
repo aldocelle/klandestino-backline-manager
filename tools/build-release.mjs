@@ -1,6 +1,7 @@
 // Empaqueta la instalación real (PHP + MySQL) para un hosting propio.
 // Uso: node tools/build-release.mjs  →  dist/klandestino-bodega-AAAAMMDD.zip
-import {cpSync, mkdirSync, rmSync, writeFileSync, existsSync} from 'node:fs';
+import {cpSync, mkdirSync, rmSync, writeFileSync, existsSync, readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 
 const stamp = new Date().toISOString().slice(0, 10).replaceAll('-', '');
@@ -18,6 +19,14 @@ cpSync('database', `${root}/database`, {recursive: true});
 // Defensa extra si src/ o config/ terminan por error dentro de la raíz pública.
 for (const dir of ['src', 'config', 'database']) writeFileSync(`${root}/${dir}/.htaccess`, 'Require all denied\nDeny from all\n');
 if (existsSync(`${root}/public_html/assets/app.bundle.js.map`)) rmSync(`${root}/public_html/assets/app.bundle.js.map`);
+// Cada CSS/JS se versiona con la huella de su contenido: el hosting guarda los assets un año en caché.
+for (const page of ['index.html', 'kit-tama.html']) {
+  const file = `${root}/public_html/${page}`; if (!existsSync(file)) continue;
+  writeFileSync(file, readFileSync(file, 'utf8').replace(/(assets\/[\w.-]+\.(?:js|css))(?:\?v=[^"']*)?(["'])/g, (m, asset, q) => {
+    const path = `${root}/public_html/${asset}`; if (!existsSync(path)) return m;
+    return `${asset}?v=${createHash('sha256').update(readFileSync(path)).digest('hex').slice(0, 10)}${q}`;
+  }));
+}
 
 writeFileSync(`${root}/INSTALAR.txt`, `KLANDESTINO BACKLINE MANAGER · INSTALACIÓN EN HOSTING PROPIO
 ==============================================================
