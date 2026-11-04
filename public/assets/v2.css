@@ -364,3 +364,13 @@ body .crew-row.crew-row-btn{display:flex;align-items:center;gap:12px;width:100%;
 .crew-row-btn>.icon:last-child{width:18px;height:18px;color:var(--muted);flex:none}
 @media(max-width:640px){.crew-grid{grid-template-columns:1fr}.tech-avatar.xl{width:96px;height:96px}}
 .tech-card-main>.tech-avatar{font-size:20px}
+.asset-hero{position:relative}
+.hero-photo-btn{position:absolute;right:12px;bottom:12px;display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 16px;border:1px solid var(--gold);border-radius:999px;background:#131518e6;color:var(--gold);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.hero-photo-btn .icon{width:18px;height:18px}
+.hero-photo-btn:hover{background:var(--gold);color:var(--ink)}
+.report-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:8px}
+.report-photo{display:flex;flex-direction:column;padding:0;border:1px solid #34373d;border-radius:10px;overflow:hidden;background:#17191c;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.report-photo:hover{border-color:var(--gold)}
+.report-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.report-photo span{padding:8px 10px;font-size:14px;font-weight:600}
+.report-photo small{display:block;font-size:13px;font-weight:400;color:var(--muted)}

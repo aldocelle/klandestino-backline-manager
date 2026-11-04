@@ -46,12 +46,21 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $name = clean_text($cmd['name'] ?? ''); require_ok($name !== '', 'Escribe el nombre del equipo.');
             $category = clean_text($cmd['category'] ?? 'Accesorios', 60);
             $warehouse = clean_text($cmd['location'] ?? 'Bodega A', 120); require_ok(in_array($warehouse, warehouses(), true), 'Elige Bodega A o Bodega B.');
-            require_ok(in_array($category, ['Tambores', 'Fierros', 'Accesorios', 'Gabinetes', 'Cabezales', 'Micrófonos', 'Cables', 'Cases'], true), 'Categoría inválida.');
+            require_ok(in_array($category, ['Tambores', 'Platillos', 'Fierros', 'Accesorios', 'Gabinetes', 'Cabezales', 'Micrófonos', 'Cables', 'Cases'], true), 'Categoría inválida.');
             $state['assets'][] = ['id' => $code, 'code' => $code, 'name' => $name, 'category' => $category,
                 'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
                 'location' => $warehouse, 'home' => $warehouse, 'serial' => clean_text($cmd['serial'] ?? '', 100),
                 'kitId' => null, 'status' => 'available', 'condition' => 'ok', 'eventId' => null, 'note' => '', 'photos' => clean_photos($cmd['photos'] ?? [])];
             $ids = [$code]; $summary = 'Equipo incorporado: ' . $name; break;
+        case 'asset_update':
+            $ai = entity_index($state['assets'], (string)($cmd['assetId'] ?? '')); $name = clean_text($cmd['name'] ?? '');
+            require_ok($name !== '', 'Escribe el nombre del equipo.');
+            $category = clean_text($cmd['category'] ?? $state['assets'][$ai]['category'], 60);
+            require_ok(in_array($category, ['Tambores', 'Platillos', 'Fierros', 'Accesorios', 'Gabinetes', 'Cabezales', 'Micrófonos', 'Cables', 'Cases'], true), 'Categoría inválida.');
+            $state['assets'][$ai] = array_merge($state['assets'][$ai], ['name' => $name, 'category' => $category,
+                'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
+                'serial' => clean_text($cmd['serial'] ?? '', 100), 'note' => clean_text($cmd['note'] ?? '', 500)]);
+            $ids = [$state['assets'][$ai]['id']]; $summary = 'Detalle actualizado: ' . $name; break;
         case 'asset_photos':
             $ai = entity_index($state['assets'], (string)($cmd['assetId'] ?? '')); $state['assets'][$ai]['photos'] = clean_photos($cmd['photos'] ?? []);
             $ids = [$state['assets'][$ai]['id']]; $summary = 'Fotos actualizadas: ' . $state['assets'][$ai]['name']; break;
