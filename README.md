@@ -55,6 +55,8 @@ Para separar un kit, la ficha agrupa los componentes en Tambores, Atriles, Hi-ha
 
 «Etiquetas QR» abre un centro de impresión: grupos por kit (QR general y piezas por Tambores, Atriles, Hi-hat y Pedales) y por categoría para el equipo suelto, con casilla por grupo y por pieza, atajos Todo / Solo QR de kits / Nada, tamaño pequeña, mediana o grande, y vista previa agrupada en la que cada etiqueta indica su kit o categoría. La ficha de kit tiene «Etiquetas del kit».
 
+Equipo técnico: 10 técnicos renombrables en Ajustes. Registrar una salida o una devolución exige elegir quién saca o quién recibe; queda en el historial («Responsable: …») y en cada pieza del evento («Salió con … · Recibió …»). La app recuerda el último técnico elegido en el dispositivo.
+
 Hay dos bodegas, nombradas solo «Bodega A» y «Bodega B»; la app no guarda sus direcciones. Cada pieza tiene una bodega base: al volver de un evento o del taller regresa a ella. «Trasladar» (en la selección del inventario y en la ficha de kit) mueve piezas disponibles entre bodegas y queda en el historial; un kit trasladado completo sigue armado. El inventario filtra por bodega o «Fuera de bodega».
 
 La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.

@@ -10,13 +10,16 @@ const isAvailable=a=>a.status==='available'&&a.condition==='ok';
 // Bodegas propias, solo por letra: la app no guarda sus direcciones.
 export const WAREHOUSES=['Bodega A','Bodega B'];
 const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
+export const defaultCrew=()=>Array.from({length:10},(_,i)=>({id:`TEC-${String(i+1).padStart(2,'0')}`,name:`Técnico ${String(i+1).padStart(2,'0')}`,active:true}));
+const crewOf=s=>Array.isArray(s.crew)&&s.crew.length?s.crew:defaultCrew();
+const crewName=(s,id)=>{const t=crewOf(s).find(t=>t.id===id&&t.active!==false);ok(t,'Elige el técnico responsable.');return t.name;};
 export function demoSeed(){
   const s=structuredClone(seed),local=(days,hour)=>{const d=new Date();d.setDate(d.getDate()+days);d.setHours(hour,0,0,0);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};
   s.events[0].start=local(1,9);s.events[0].end=local(2,12);s.events[1].start=local(0,10);s.events[1].end=local(1,11);s.movements[0].at=new Date().toISOString();return s;
 }
 export function applyDemoCommand(source,cmd){
   const s=structuredClone(source),asset=id=>find(s.assets,id),kit=id=>find(s.kits,id),event=id=>find(s.events,id);
-  let ids=[],eventId=null,summary='',note='';
+  let ids=[],eventId=null,summary='',note='',by=null;
   switch(cmd.type){
     case 'create_asset':{
       const code=text(cmd.code,60).toUpperCase(),name=text(cmd.name),category=text(cmd.category||'Accesorios',60),warehouse=text(cmd.location||'Bodega A',120);ok(WAREHOUSES.includes(warehouse),'Elige Bodega A o Bodega B.');
@@ -52,24 +55,28 @@ export function applyDemoCommand(source,cmd){
     }
     case 'dispatch':case 'release':case 'return':{
       eventId=cmd.eventId;const e=event(eventId);ids=selected(cmd);const condition=cmd.condition||'ok';note=text(cmd.note,1500);
-      ok(['ok','damage','missing'].includes(condition),'Estado de devolución inválido.');if(cmd.type==='return'&&condition!=='ok')ok(note.length>=3,'Describe el daño o faltante.');
+      ok(['ok','damage','missing'].includes(condition),'Estado de devolución inválido.');by=cmd.type==='release'?null:crewName(s,cmd.responsibleId);if(cmd.type==='return'&&condition!=='ok')ok(note.length>=3,'Describe el daño o faltante.');
       for(const id of ids){const a=asset(id),it=e.items.find(i=>i.assetId===id&&['reserved','out','missing'].includes(i.status));ok(it&&a.eventId===eventId,'El equipo no está asignado activamente a este evento.');
         if(cmd.type==='dispatch'||cmd.type==='release'){
           ok(a.status==='reserved'&&it.status==='reserved','Solo puedes sacar o liberar equipos reservados.');a.status=cmd.type==='dispatch'?'out':'available';it.status=cmd.type==='dispatch'?'out':'released';
-          if(cmd.type==='release')a.eventId=null;else a.location=e.place;
+          if(cmd.type==='release')a.eventId=null;else{a.location=e.place;it.outBy=by;}
         }else{
           ok(['out','missing'].includes(a.status)&&['out','missing'].includes(it.status),'El equipo aún no ha salido o ya fue devuelto.');
           a.status=condition==='damage'?'maintenance':condition==='missing'?'missing':'available';a.condition=condition==='missing'?'review':condition;
           if(condition!=='missing')a.location=condition==='damage'?'Taller':homeOf(a);a.eventId=condition==='missing'?eventId:null;a.note=note;
-          it.status=condition==='missing'?'missing':'returned';it.condition=condition;it.note=note;
+          it.status=condition==='missing'?'missing':'returned';it.condition=condition;it.note=note;it.inBy=by;
         }
       }
-      summary=(cmd.type==='dispatch'?'Salida registrada':cmd.type==='release'?'Reserva liberada':condition==='missing'?'Faltante reportado':'Devolución registrada')+': '+ids.length+' piezas · '+e.name;break;
+      summary=(cmd.type==='dispatch'?'Salida registrada':cmd.type==='release'?'Reserva liberada':condition==='missing'?'Faltante reportado':'Devolución registrada')+': '+ids.length+' piezas · '+e.name+(by?' · Responsable: '+by:'');break;
     }
     case 'maintenance':{
       ids=selected(cmd);const ready=cmd.ready===true;note=text(cmd.note,1500);
       for(const id of ids){const a=asset(id);ok(ready?a.status==='maintenance':a.status==='available','El equipo no admite ese cambio de mantenimiento.');a.status=ready?'available':'maintenance';a.condition=ready?'ok':'review';a.location=ready?homeOf(a):'Taller';a.note=note;}
       summary=ready?'Revisión técnica completada':'Equipos enviados a mantenimiento';break;
+    }
+    case 'crew_rename':{
+      const crew=structuredClone(crewOf(s)),name=text(cmd.name,80),t=crew.find(t=>t.id===cmd.crewId);ok(name,'Escribe el nombre del técnico.');ok(t,'Técnico no encontrado.');
+      ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');t.name=name;s.crew=crew;summary='Equipo técnico actualizado: '+name;break;
     }
     case 'transfer':{
       ids=selected(cmd);const to=text(cmd.warehouse,40);note=text(cmd.note||'',500);ok(WAREHOUSES.includes(to),'Elige Bodega A o Bodega B.');
@@ -79,7 +86,8 @@ export function applyDemoCommand(source,cmd){
     default:throw new Error('Operación no válida.');
   }
   for(const k of s.kits){const parts=s.assets.filter(a=>a.kitId===k.id);if(!k.expectedIds.every(id=>parts.some(a=>a.id===id))||new Set(parts.map(a=>a.status)).size!==1||new Set(parts.map(a=>a.location)).size!==1||parts.some(a=>a.condition!=='ok'))k.assembled=false;}
-  const movement={id:uid('MOV'),at:new Date().toISOString(),type:cmd.type,summary,assetIds:ids,actor:'Operador demo',eventId,note};
+  if(!Array.isArray(s.crew))s.crew=defaultCrew();
+  const movement={id:uid('MOV'),at:new Date().toISOString(),type:cmd.type,summary,assetIds:ids,actor:'Operador demo',eventId,note,responsible:by};
   if(cmd.type==='return'&&cmd.photo){ok(typeof cmd.photo==='string'&&cmd.photo.length<200000&&cmd.photo.startsWith('data:image/jpeg;base64,'),'La foto debe ser JPEG y pesar menos de 150 KB.');const bytes=atob(cmd.photo.slice(23));ok(bytes.startsWith('\xff\xd8\xff'),'Foto inválida.');movement.photo=cmd.photo;}
   s.movements.unshift(movement);s.revision++;return s;
 }

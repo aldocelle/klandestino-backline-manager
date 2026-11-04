@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/domain.php';
 
 function seed_state(): array
 {
@@ -69,7 +70,7 @@ function seed_state(): array
         if ($asset['id'] === 'HW-BOOM-008') { $asset['status'] = 'maintenance'; $asset['condition'] = 'damage'; $asset['location'] = 'Taller'; $asset['note'] = 'Revisar mariposa de ajuste.'; }
     }
     unset($asset);
-    return ['version' => 1, 'revision' => 0, 'assets' => $assets, 'kits' => $kits, 'events' => $events,
+    return ['version' => 1, 'revision' => 0, 'assets' => $assets, 'kits' => $kits, 'events' => $events, 'crew' => default_crew(),
         'movements' => [['id' => 'MOV-SEED', 'at' => $now->format(DATE_ATOM), 'type' => 'seed',
             'summary' => 'Inventario de demostración cargado', 'assetIds' => [], 'actor' => 'Sistema demo', 'eventId' => null, 'note' => 'Datos ficticios; confirmar equipos y cantidades con bodega.']]];
 }

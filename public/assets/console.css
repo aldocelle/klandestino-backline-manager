@@ -316,3 +316,16 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
   .qr-print-grid{gap:2mm}
 }
 @media print{@page{size:A4;margin:10mm}}
+
+/* Técnicos responsables */
+.crew-choice{border:0;padding:0;margin:14px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.crew-choice legend{font-size:15px;font-weight:600;color:var(--text);margin-bottom:10px;padding:0}
+.crew-choice .check-label{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#15171a;font-size:14px;color:var(--text);cursor:pointer}
+.crew-choice .check-label:has(input:checked){border-color:var(--gold);background:#2a2316;color:#f4e4c3}
+.crew-choice input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--gold)}
+.crew-list{display:grid;gap:6px;margin-top:10px}
+.crew-row{display:grid;grid-template-columns:60px minmax(0,1fr) auto;gap:8px;align-items:center}
+.crew-row .crew-id{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted)}
+.crew-row input{min-height:40px}
+.crew-mobile{display:none}
+@media(max-width:640px){.crew-choice{grid-template-columns:1fr 1fr}.crew-mobile{display:block;color:#c8b183}}

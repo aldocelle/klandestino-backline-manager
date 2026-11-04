@@ -1718,10 +1718,62 @@
             ]
         }
     ],
+    "crew": [
+        {
+            "id": "TEC-01",
+            "name": "Técnico 01",
+            "active": true
+        },
+        {
+            "id": "TEC-02",
+            "name": "Técnico 02",
+            "active": true
+        },
+        {
+            "id": "TEC-03",
+            "name": "Técnico 03",
+            "active": true
+        },
+        {
+            "id": "TEC-04",
+            "name": "Técnico 04",
+            "active": true
+        },
+        {
+            "id": "TEC-05",
+            "name": "Técnico 05",
+            "active": true
+        },
+        {
+            "id": "TEC-06",
+            "name": "Técnico 06",
+            "active": true
+        },
+        {
+            "id": "TEC-07",
+            "name": "Técnico 07",
+            "active": true
+        },
+        {
+            "id": "TEC-08",
+            "name": "Técnico 08",
+            "active": true
+        },
+        {
+            "id": "TEC-09",
+            "name": "Técnico 09",
+            "active": true
+        },
+        {
+            "id": "TEC-10",
+            "name": "Técnico 10",
+            "active": true
+        }
+    ],
     "movements": [
         {
             "id": "MOV-SEED",
-            "at": "2026-11-03T23:25:58-03:00",
+            "at": "2026-11-03T23:32:21-03:00",
             "type": "seed",
             "summary": "Inventario de demostración cargado",
             "assetIds": [],

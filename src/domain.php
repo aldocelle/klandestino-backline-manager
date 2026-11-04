@@ -15,6 +15,10 @@ function clean_text(mixed $value, int $max = 180): string {
 /** Bodegas propias. Se nombran solo por letra: sus direcciones no se guardan en la app. */
 function warehouses(): array { return ['Bodega A', 'Bodega B']; }
 function home_of(array $asset): string { return in_array($asset['home'] ?? '', warehouses(), true) ? $asset['home'] : 'Bodega A'; }
+/** Equipo técnico responsable de salidas y devoluciones (10 cupos, renombrables). */
+function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['id' => sprintf('TEC-%02d', $n), 'name' => sprintf('Técnico %02d', $n), 'active' => true]; return $c; }
+function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
+function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function selected_ids(array $command): array {
     $ids = $command['assetIds'] ?? [];
     require_ok(is_array($ids) && count($ids) > 0 && count($ids) <= 500, 'Selecciona al menos un equipo.');
@@ -23,7 +27,7 @@ function selected_ids(array $command): array {
     return array_values($ids);
 }
 function apply_command(array $state, array $cmd, string $actor): array {
-    $type = $cmd['type'] ?? ''; $ids = []; $summary = ''; $eventId = null; $note = '';
+    $type = $cmd['type'] ?? ''; $ids = []; $summary = ''; $eventId = null; $note = ''; $by = null;
     $newId = fn(string $prefix): string => $prefix . '-' . strtoupper(bin2hex(random_bytes(5)));
     switch ($type) {
         case 'create_asset':
@@ -100,6 +104,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); $ids = selected_ids($cmd);
             $condition = $cmd['condition'] ?? 'ok'; $note = clean_text($cmd['note'] ?? '', 1500);
             require_ok(in_array($condition, ['ok', 'damage', 'missing'], true), 'Estado de devolución inválido.');
+            $by = $type === 'release' ? null : crew_name($state, $cmd['responsibleId'] ?? '');
             if ($type === 'return' && $condition !== 'ok') require_ok(strlen($note) >= 3, 'Describe el daño o faltante.');
             foreach ($ids as $id) {
                 $ai = entity_index($state['assets'], $id); $ii = null;
@@ -109,18 +114,18 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 if ($type === 'dispatch' || $type === 'release') {
                     require_ok($a['status'] === 'reserved' && $it['status'] === 'reserved', 'Solo puedes sacar o liberar equipos reservados.');
                     $a['status'] = $type === 'dispatch' ? 'out' : 'available'; $it['status'] = $type === 'dispatch' ? 'out' : 'released';
-                    if ($type === 'release') $a['eventId'] = null; else $a['location'] = $state['events'][$ei]['place'];
+                    if ($type === 'release') $a['eventId'] = null; else { $a['location'] = $state['events'][$ei]['place']; $it['outBy'] = $by; }
                 } else {
                     require_ok(in_array($a['status'], ['out', 'missing'], true) && in_array($it['status'], ['out', 'missing'], true), 'El equipo aún no ha salido o ya fue devuelto.');
                     $a['status'] = match ($condition) { 'damage' => 'maintenance', 'missing' => 'missing', default => 'available' };
                     $a['condition'] = $condition === 'missing' ? 'review' : $condition;
                     $a['location'] = $condition === 'missing' ? $a['location'] : ($condition === 'damage' ? 'Taller' : home_of($a));
                     $a['eventId'] = $condition === 'missing' ? $eventId : null; $a['note'] = $note;
-                    $it['status'] = $condition === 'missing' ? 'missing' : 'returned'; $it['condition'] = $condition; $it['note'] = $note;
+                    $it['status'] = $condition === 'missing' ? 'missing' : 'returned'; $it['condition'] = $condition; $it['note'] = $note; $it['inBy'] = $by;
                 }
                 unset($a, $it);
             }
-            $summary = match ($type) { 'dispatch' => 'Salida registrada', 'release' => 'Reserva liberada', default => $condition === 'missing' ? 'Faltante reportado' : 'Devolución registrada' } . ': ' . count($ids) . ' piezas · ' . $state['events'][$ei]['name']; break;
+            $summary = match ($type) { 'dispatch' => 'Salida registrada', 'release' => 'Reserva liberada', default => $condition === 'missing' ? 'Faltante reportado' : 'Devolución registrada' } . ': ' . count($ids) . ' piezas · ' . $state['events'][$ei]['name'] . ($by ? ' · Responsable: ' . $by : ''); break;
         case 'maintenance':
             $ids = selected_ids($cmd); $ready = ($cmd['ready'] ?? false) === true; $note = clean_text($cmd['note'] ?? '', 1500);
             foreach ($ids as $id) {
@@ -130,6 +135,12 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $a['location'] = $ready ? home_of($a) : 'Taller'; $a['note'] = $note; unset($a);
             }
             $summary = $ready ? 'Revisión técnica completada' : 'Equipos enviados a mantenimiento'; break;
+        case 'crew_rename':
+            $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $name = clean_text($cmd['name'] ?? '', 80);
+            require_ok($name !== '', 'Escribe el nombre del técnico.'); $found = false;
+            foreach ($crew as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un técnico con ese nombre.');
+            foreach ($crew as &$t) if ($t['id'] === $tid) { $t['name'] = $name; $found = true; } unset($t);
+            require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Equipo técnico actualizado: ' . $name; break;
         case 'transfer':
             $ids = selected_ids($cmd); $to = clean_text($cmd['warehouse'] ?? '', 40); $note = clean_text($cmd['note'] ?? '', 500);
             require_ok(in_array($to, warehouses(), true), 'Elige Bodega A o Bodega B.');
@@ -147,7 +158,8 @@ function apply_command(array $state, array $cmd, string $actor): array {
         if (count(array_diff($kit['expectedIds'], array_column($parts, 'id'))) || count(array_unique(array_column($parts, 'status'))) !== 1 || count(array_unique(array_column($parts, 'location'))) !== 1 || array_filter($parts, fn($a) => $a['condition'] !== 'ok')) $kit['assembled'] = false;
     }
     unset($kit);
-    $movement = ['id' => $newId('MOV'), 'at' => date(DATE_ATOM), 'type' => $type, 'summary' => $summary,
+    if (!isset($state['crew'])) $state['crew'] = default_crew();
+    $movement = ['id' => $newId('MOV'), 'at' => date(DATE_ATOM), 'type' => $type, 'summary' => $summary, 'responsible' => $by ?? null,
         'assetIds' => $ids, 'actor' => $actor, 'eventId' => $eventId, 'note' => $note];
     if ($type === 'return' && !empty($cmd['photo'])) {
         $photo = $cmd['photo']; require_ok(is_string($photo) && strlen($photo) < 200000 && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y pesar menos de 150 KB.');
