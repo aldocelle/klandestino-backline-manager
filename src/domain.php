@@ -12,6 +12,9 @@ function clean_text(mixed $value, int $max = 180): string {
     $value = trim($value); require_ok(strlen($value) <= $max, 'El texto supera el largo permitido.');
     return $value;
 }
+/** Bodegas propias. Se nombran solo por letra: sus direcciones no se guardan en la app. */
+function warehouses(): array { return ['Bodega A', 'Bodega B']; }
+function home_of(array $asset): string { return in_array($asset['home'] ?? '', warehouses(), true) ? $asset['home'] : 'Bodega A'; }
 function selected_ids(array $command): array {
     $ids = $command['assetIds'] ?? [];
     require_ok(is_array($ids) && count($ids) > 0 && count($ids) <= 500, 'Selecciona al menos un equipo.');
@@ -29,10 +32,11 @@ function apply_command(array $state, array $cmd, string $actor): array {
             foreach ($state['assets'] as $a) require_ok($a['code'] !== $code, 'Ese código ya existe.');
             $name = clean_text($cmd['name'] ?? ''); require_ok($name !== '', 'Escribe el nombre del equipo.');
             $category = clean_text($cmd['category'] ?? 'Accesorios', 60);
+            $warehouse = clean_text($cmd['location'] ?? 'Bodega A', 120); require_ok(in_array($warehouse, warehouses(), true), 'Elige Bodega A o Bodega B.');
             require_ok(in_array($category, ['Tambores', 'Fierros', 'Accesorios', 'Gabinetes', 'Cabezales', 'Micrófonos', 'Cables', 'Cases'], true), 'Categoría inválida.');
             $state['assets'][] = ['id' => $code, 'code' => $code, 'name' => $name, 'category' => $category,
                 'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
-                'location' => clean_text($cmd['location'] ?? 'Bodega A', 120), 'serial' => clean_text($cmd['serial'] ?? '', 100),
+                'location' => $warehouse, 'home' => $warehouse, 'serial' => clean_text($cmd['serial'] ?? '', 100),
                 'kitId' => null, 'status' => 'available', 'condition' => 'ok', 'eventId' => null, 'note' => ''];
             $ids = [$code]; $summary = 'Equipo incorporado: ' . $name; break;
         case 'create_kit':
@@ -110,7 +114,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
                     require_ok(in_array($a['status'], ['out', 'missing'], true) && in_array($it['status'], ['out', 'missing'], true), 'El equipo aún no ha salido o ya fue devuelto.');
                     $a['status'] = match ($condition) { 'damage' => 'maintenance', 'missing' => 'missing', default => 'available' };
                     $a['condition'] = $condition === 'missing' ? 'review' : $condition;
-                    $a['location'] = $condition === 'missing' ? $a['location'] : ($condition === 'damage' ? 'Taller' : 'Bodega A');
+                    $a['location'] = $condition === 'missing' ? $a['location'] : ($condition === 'damage' ? 'Taller' : home_of($a));
                     $a['eventId'] = $condition === 'missing' ? $eventId : null; $a['note'] = $note;
                     $it['status'] = $condition === 'missing' ? 'missing' : 'returned'; $it['condition'] = $condition; $it['note'] = $note;
                 }
@@ -123,9 +127,18 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $ai = entity_index($state['assets'], $id); $a = &$state['assets'][$ai];
                 require_ok($ready ? $a['status'] === 'maintenance' : $a['status'] === 'available', 'El equipo no admite ese cambio de mantenimiento.');
                 $a['status'] = $ready ? 'available' : 'maintenance'; $a['condition'] = $ready ? 'ok' : 'review';
-                $a['location'] = $ready ? 'Bodega A' : 'Taller'; $a['note'] = $note; unset($a);
+                $a['location'] = $ready ? home_of($a) : 'Taller'; $a['note'] = $note; unset($a);
             }
             $summary = $ready ? 'Revisión técnica completada' : 'Equipos enviados a mantenimiento'; break;
+        case 'transfer':
+            $ids = selected_ids($cmd); $to = clean_text($cmd['warehouse'] ?? '', 40); $note = clean_text($cmd['note'] ?? '', 500);
+            require_ok(in_array($to, warehouses(), true), 'Elige Bodega A o Bodega B.');
+            foreach ($ids as $id) {
+                $ai = entity_index($state['assets'], $id); $a = &$state['assets'][$ai];
+                require_ok($a['status'] === 'available' && $a['condition'] === 'ok', $a['name'] . ' no está disponible en bodega; no se puede trasladar.');
+                $a['location'] = $to; $a['home'] = $to; unset($a);
+            }
+            $summary = 'Traslado a ' . $to . ': ' . count($ids) . ' piezas'; break;
         default: throw new DomainError('Operación no válida.');
     }
     // An assembled kit can never stay "complete" when its components split locations/statuses.

@@ -175,3 +175,57 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
 @media print{.camera-start{display:none!important}}
 #scanResult{scroll-margin-top:76px}
 .camera-stage{scroll-margin-top:72px}
+
+/* Separación rápida de kits: atajos y grupos de componentes */
+.kit-quick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;padding:10px;border:1px solid #2d3036;border-radius:8px;background:#121417}
+.kit-quick-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9fa8;margin-right:4px;flex-basis:100%}
+.kit-quick .btn{min-height:38px;font-size:11px;padding:8px 11px}
+.kit-quick .btn small{display:inline-grid;place-items:center;min-width:20px;height:18px;padding:0 5px;border-radius:9px;background:#0004;font-size:10px;color:var(--gold)}
+.kit-group{margin-top:8px}
+.kit-group+.kit-group{margin-top:16px}
+.kit-group-head{display:flex;align-items:center;gap:8px;padding:8px 0 6px;position:sticky;top:0;z-index:1;background:inherit}
+.kit-group-head strong{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#e9d3a8}
+.kit-group-head small{color:#8f949d;font-size:10px}
+.kit-group-head .kit-group-btn{margin-left:auto;min-height:32px;font-size:10px;padding:6px 10px}
+@media(max-width:640px){
+  .kit-quick .btn{min-height:44px;font-size:13px;flex:1 1 calc(50% - 6px)}
+  .kit-group-head strong{font-size:13px}
+  .kit-group-head .kit-group-btn{min-height:40px;font-size:12px}
+  .kit-part input[type=checkbox]{width:22px;height:22px}
+}
+.kit-sticky{display:none}
+@media(max-width:640px){
+  .kit-sticky:not([hidden]){position:fixed;left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:35;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 14px;border:1px solid #9f7838;border-radius:10px;background:#1c1a16f2;box-shadow:0 10px 28px #000b;backdrop-filter:blur(8px);font-size:13px;color:#f4e4c3}
+  .kit-sticky strong{color:var(--gold);font-size:15px}
+  .kit-sticky .btn{min-height:44px;font-size:12px;white-space:normal}
+  body.kit-workspace #kitSelection{scroll-margin-top:16px}
+}
+@media print{.kit-sticky{display:none!important}}
+
+/* Traslado entre bodegas */
+.warehouse-choice{border:0;padding:0;margin-inline:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.warehouse-choice legend{font-size:12px;color:var(--muted);margin-bottom:8px;padding:0}
+.warehouse-choice .check-label{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#15171a;font-size:14px;color:var(--text);cursor:pointer;white-space:nowrap}
+.warehouse-choice .check-label:has(input:checked){border-color:var(--gold);background:#2a2316;color:#f4e4c3}
+.warehouse-choice input[type=radio]{width:18px;height:18px;margin:0;flex:none;accent-color:var(--gold)}
+
+/* Textos cortos sin cortes: botones del kit, grupos, piezas y menú lateral */
+.kit-workbench .kit-actions>.btn{flex:1 1 auto;white-space:nowrap}
+.kit-profile .kit-actions>.primary{order:-1;flex-basis:100%}
+.kit-group-head .kit-group-btn{white-space:nowrap;flex:none}
+.kit-components{container-type:inline-size}
+@container (max-width:560px){
+  .kit-list-head,.kit-part{grid-template-columns:minmax(0,1fr) auto 26px;grid-template-areas:"name state qr" "code state qr";row-gap:2px}
+  .kit-list-head>span:nth-child(2){display:none}
+  .kit-list-head>span:nth-child(1){grid-area:name}.kit-list-head>span:nth-child(3){grid-area:state}.kit-list-head>span:nth-child(4){grid-area:qr}
+  .kit-part>.kit-part-name{grid-area:name;min-width:0}
+  .kit-part>.kit-part-code{grid-area:code;padding-left:31px;font-size:11px;color:#8f949d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kit-part>.badge{grid-area:state;align-self:center}
+  .kit-part>.icon-btn{grid-area:qr;align-self:center}
+  .kit-part-name button{white-space:normal;text-align:left}
+}
+@media(max-width:940px) and (min-width:641px){.sidebar-help .help-long{display:none}}
+.kit-visual.has-photo{position:relative;overflow:hidden;background:#0b0c0e}
+.kit-visual.has-photo .kit-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:45% 55%;filter:saturate(.92) contrast(1.04)}
+.kit-visual.has-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0000 55%,#0b0c0ecc);pointer-events:none}
+.kit-visual.has-photo .kit-hero-label{z-index:3}

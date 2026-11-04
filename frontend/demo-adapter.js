@@ -7,6 +7,9 @@ const find=(list,id)=>{const result=list.find(v=>v.id===id);ok(result,'No se enc
 const selected=cmd=>{const ids=cmd.assetIds;ok(Array.isArray(ids)&&ids.length>0&&ids.length<=500,'Selecciona al menos un equipo.');ok(ids.every(id=>typeof id==='string'&&id.length<100)&&new Set(ids).size===ids.length,'La selección tiene códigos inválidos o repetidos.');return ids;};
 const uid=prefix=>prefix+'-'+crypto.randomUUID().replaceAll('-','').slice(0,10).toUpperCase();
 const isAvailable=a=>a.status==='available'&&a.condition==='ok';
+// Bodegas propias, solo por letra: la app no guarda sus direcciones.
+export const WAREHOUSES=['Bodega A','Bodega B'];
+const homeOf=a=>WAREHOUSES.includes(a.home)?a.home:'Bodega A';
 export function demoSeed(){
   const s=structuredClone(seed),local=(days,hour)=>{const d=new Date();d.setDate(d.getDate()+days);d.setHours(hour,0,0,0);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};
   s.events[0].start=local(1,9);s.events[0].end=local(2,12);s.events[1].start=local(0,10);s.events[1].end=local(1,11);s.movements[0].at=new Date().toISOString();return s;
@@ -16,10 +19,10 @@ export function applyDemoCommand(source,cmd){
   let ids=[],eventId=null,summary='',note='';
   switch(cmd.type){
     case 'create_asset':{
-      const code=text(cmd.code,60).toUpperCase(),name=text(cmd.name),category=text(cmd.category||'Accesorios',60);
+      const code=text(cmd.code,60).toUpperCase(),name=text(cmd.name),category=text(cmd.category||'Accesorios',60),warehouse=text(cmd.location||'Bodega A',120);ok(WAREHOUSES.includes(warehouse),'Elige Bodega A o Bodega B.');
       ok(/^[A-Z0-9][A-Z0-9_-]{2,59}$/.test(code),'Código inválido.');ok(!s.assets.some(a=>a.code===code),'Ese código ya existe.');ok(name,'Escribe el nombre del equipo.');
       ok(['Tambores','Fierros','Accesorios','Gabinetes','Cabezales','Micrófonos','Cables','Cases'].includes(category),'Categoría inválida.');
-      s.assets.push({id:code,code,name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),location:text(cmd.location||'Bodega A',120),serial:text(cmd.serial,100),kitId:null,status:'available',condition:'ok',eventId:null,note:''});
+      s.assets.push({id:code,code,name,category,brand:text(cmd.brand,80),model:text(cmd.model,100),location:warehouse,home:warehouse,serial:text(cmd.serial,100),kitId:null,status:'available',condition:'ok',eventId:null,note:''});
       ids=[code];summary='Equipo incorporado: '+name;break;
     }
     case 'create_kit':{
@@ -57,7 +60,7 @@ export function applyDemoCommand(source,cmd){
         }else{
           ok(['out','missing'].includes(a.status)&&['out','missing'].includes(it.status),'El equipo aún no ha salido o ya fue devuelto.');
           a.status=condition==='damage'?'maintenance':condition==='missing'?'missing':'available';a.condition=condition==='missing'?'review':condition;
-          if(condition!=='missing')a.location=condition==='damage'?'Taller':'Bodega A';a.eventId=condition==='missing'?eventId:null;a.note=note;
+          if(condition!=='missing')a.location=condition==='damage'?'Taller':homeOf(a);a.eventId=condition==='missing'?eventId:null;a.note=note;
           it.status=condition==='missing'?'missing':'returned';it.condition=condition;it.note=note;
         }
       }
@@ -65,8 +68,13 @@ export function applyDemoCommand(source,cmd){
     }
     case 'maintenance':{
       ids=selected(cmd);const ready=cmd.ready===true;note=text(cmd.note,1500);
-      for(const id of ids){const a=asset(id);ok(ready?a.status==='maintenance':a.status==='available','El equipo no admite ese cambio de mantenimiento.');a.status=ready?'available':'maintenance';a.condition=ready?'ok':'review';a.location=ready?'Bodega A':'Taller';a.note=note;}
+      for(const id of ids){const a=asset(id);ok(ready?a.status==='maintenance':a.status==='available','El equipo no admite ese cambio de mantenimiento.');a.status=ready?'available':'maintenance';a.condition=ready?'ok':'review';a.location=ready?homeOf(a):'Taller';a.note=note;}
       summary=ready?'Revisión técnica completada':'Equipos enviados a mantenimiento';break;
+    }
+    case 'transfer':{
+      ids=selected(cmd);const to=text(cmd.warehouse,40);note=text(cmd.note||'',500);ok(WAREHOUSES.includes(to),'Elige Bodega A o Bodega B.');
+      for(const id of ids){const a=asset(id);ok(isAvailable(a),a.name+' no está disponible en bodega; no se puede trasladar.');a.location=to;a.home=to;}
+      summary='Traslado a '+to+': '+ids.length+' piezas';break;
     }
     default:throw new Error('Operación no válida.');
   }

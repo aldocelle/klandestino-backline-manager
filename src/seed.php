@@ -7,29 +7,39 @@ function seed_state(): array
     $kits = [];
     $add = function (string $id, string $name, string $category, string $brand, string $model, ?string $kitId = null, string $location = 'Bodega A') use (&$assets): string {
         $assets[] = ['id' => $id, 'code' => $id, 'name' => $name, 'category' => $category,
-            'brand' => $brand, 'model' => $model, 'kitId' => $kitId, 'location' => $location,
+            'brand' => $brand, 'model' => $model, 'kitId' => $kitId, 'location' => $location, 'home' => 'Bodega A',
             'status' => 'available', 'condition' => 'ok', 'eventId' => null, 'note' => '',
             'serial' => 'DEMO-' . $id];
         return $id;
     };
+    // Composición por kit confirmada con bodega (3/11/2026): doble bombo, 3 toms, 2 toms de piso,
+    // atril de caja, 2 pedales + pedal doble, 3 soportes de tom, 4 boom, 4 rectos, sillín e hi-hat
+    // con atril, varilla y clutch trazables por separado. Caja Mapex Black Panther 14”.
     $parts = [
-        ['BD', 'Bombo 22”', 'Tambores'], ['T10', 'Tom 10”', 'Tambores'],
-        ['T12', 'Tom 12”', 'Tambores'], ['F14', 'Tom de piso 14”', 'Tambores'],
-        ['F16', 'Tom de piso 16”', 'Tambores'], ['SN', 'Caja 14”', 'Tambores'],
-        ['SS', 'Atril de caja', 'Fierros'], ['HH', 'Atril hi-hat', 'Fierros'],
+        ['BD1', 'Bombo 22” maple · derecho', 'Tambores'], ['BD2', 'Bombo 22” maple · izquierdo', 'Tambores'],
+        ['SN', 'Caja 14” Mapex Black Panther', 'Tambores', 'Mapex', 'Black Panther'],
+        ['T10', 'Tom 10”', 'Tambores'], ['T12', 'Tom 12”', 'Tambores'], ['T13', 'Tom 13”', 'Tambores'],
+        ['F14', 'Tom de piso 14”', 'Tambores'], ['F16', 'Tom de piso 16”', 'Tambores'],
+        ['SS', 'Atril de caja', 'Fierros'],
         ['B1', 'Atril boom 01', 'Fierros'], ['B2', 'Atril boom 02', 'Fierros'],
-        ['B3', 'Atril boom 03', 'Fierros'], ['PD', 'Pedal de bombo', 'Fierros'],
-        ['TH', 'Banqueta', 'Fierros'], ['CL', 'Clutch hi-hat', 'Accesorios'],
+        ['B3', 'Atril boom 03', 'Fierros'], ['B4', 'Atril boom 04', 'Fierros'],
+        ['R1', 'Atril recto 01', 'Fierros'], ['R2', 'Atril recto 02', 'Fierros'],
+        ['R3', 'Atril recto 03', 'Fierros'], ['R4', 'Atril recto 04', 'Fierros'],
+        ['TM1', 'Soporte de tom 01', 'Fierros'], ['TM2', 'Soporte de tom 02', 'Fierros'], ['TM3', 'Soporte de tom 03', 'Fierros'],
+        ['PD1', 'Pedal de bombo 01', 'Fierros'], ['PD2', 'Pedal de bombo 02', 'Fierros'], ['DP', 'Pedal doble', 'Fierros'],
+        ['ST', 'Sillín', 'Fierros'],
+        ['HH', 'Atril hi-hat', 'Fierros'], ['HR', 'Varilla hi-hat', 'Accesorios'], ['CL', 'Clutch hi-hat', 'Accesorios'],
     ];
     foreach ([1, 2] as $n) {
         $code = 'TAM-SCM-00' . $n;
         $ids = [];
-        foreach ($parts as [$suffix, $name, $category]) {
-            $ids[] = $add($code . '-' . $suffix, $name, $category, 'Tama', 'Starclassic Maple', $code);
+        foreach ($parts as $part) {
+            [$suffix, $name, $category] = $part;
+            $ids[] = $add($code . '-' . $suffix, $name, $category, $part[3] ?? 'Tama', $part[4] ?? 'Starclassic Maple', $code);
         }
         $kits[] = ['id' => $code, 'name' => 'Tama Starclassic Maple 0' . $n, 'brand' => 'Tama',
             'finish' => $n === 1 ? 'Maple Tobacco Burst' : 'Dark Mocha Fade', 'assembled' => true,
-            'expectedIds' => $ids, 'note' => 'Configuración ficticia para demostración.'];
+            'expectedIds' => $ids, 'note' => 'Doble bombo 2×22” · toms 10”, 12”, 13” · piso 14”, 16” · caja Mapex Black Panther 14” · 27 piezas trazables.'];
     }
     for ($n = 1; $n <= 4; $n++) $add(sprintf('MAR-1960A-%03d', $n), 'Marshall 1960A ' . sprintf('%02d', $n), 'Gabinetes', 'Marshall', '1960A · 4×12');
     for ($n = 1; $n <= 2; $n++) {

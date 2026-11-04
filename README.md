@@ -16,9 +16,9 @@ App de bodega y logística para backline. Backend **PHP 8.2+**, almacenamiento *
 
 ## Inventario demo
 
-73 activos individuales (los kits no duplican stock):
+99 activos individuales (los kits no duplican stock):
 
-- 2 Tama Starclassic Maple, 14 componentes cada una.
+- 2 Tama Starclassic Maple doble bombo, 27 componentes cada una: 2 bombos 22” maple, caja 14” Mapex Black Panther, toms 10”, 12” y 13”, toms de piso 14” y 16”; atril de caja, 4 atriles boom, 4 rectos, 3 soportes de tom, 2 pedales de bombo, pedal doble, sillín y hi-hat con atril, varilla y clutch, cada pieza con su QR.
 - 4 Marshall 1960A, 2 Ampeg SVT 8×10, 2 Kemper Profiler.
 - Atriles rectos y boom, hi-hats, clutches, micrófonos, cables y cases.
 - 2 eventos ficticios, uno con cinco equipos fuera y un atril en revisión.
@@ -48,6 +48,10 @@ La interfaz usa una consola de operaciones en negro/grafito, tipografía condens
 El tour guiado ofrece 13 pasos contextuales con las pantallas existentes, foco visual, avance/retroceso, salida y control por teclado. Se ofrece en la primera visita y puede repetirse desde Ayuda o Ajustes. No ejecuta comandos de inventario, no activa la cámara y conserva las selecciones al salir. La preferencia de bienvenida se recuerda en este navegador.
 
 En móvil, «Escanear» es el botón central de la barra inferior: abre el visor, que se activa con un toque (o solo, si el navegador ya concedió el permiso de cámara; nunca durante el tour). Tras cada lectura hay vibración breve y «Escanear otro»; un código desconocido avisa sin cortar la cámara. Usa el lector nativo `BarcodeDetector` cuando existe y jsQR como respaldo. Ajustes, Mantenimiento y Reportes quedan en el ícono de engranaje de la barra superior. Botones del escáner de 46 px y campos de 16 px para evitar el zoom automático de iOS.
+
+Para separar un kit, la ficha agrupa los componentes en Tambores, Atriles, Hi-hat y Pedales/soportes/sillín, con atajos «Todo el kit», «Solo tambores», «Solo fierros» y «Elegir grupo». Tambores y fierros del mismo kit pueden ir a eventos distintos; el kit solo se rearma cuando vuelven todas sus piezas. En móvil, una barra fija muestra cuántas piezas están elegidas y lleva a reservar.
+
+Hay dos bodegas, nombradas solo «Bodega A» y «Bodega B»; la app no guarda sus direcciones. Cada pieza tiene una bodega base: al volver de un evento o del taller regresa a ella. «Trasladar» (en la selección del inventario y en la ficha de kit) mueve piezas disponibles entre bodegas y queda en el historial; un kit trasladado completo sigue armado. El inventario filtra por bodega o «Fuera de bodega».
 
 La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
 
