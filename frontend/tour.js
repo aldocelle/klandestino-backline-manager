@@ -2,6 +2,33 @@ const KEY='kb-guided-tour-v1';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const check='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>';
 
+// Recorrido por el menú: en escritorio, el sidebar completo; en celular, la barra inferior y el botón «Más».
+const MENU=[
+  ['dashboard','Inicio · tu tablero','El resumen del día: accesos rápidos para armar un pedido, escanear o ver eventos, y los contadores de la bodega.'],
+  ['events','Eventos · salidas y devoluciones','Cada evento reúne destino, fechas, responsable, transporte, afiche y equipos. El número indica cuántos tienen equipos reservados o fuera.'],
+  ['inventory','Equipos · el inventario completo','Todas las piezas, con búsqueda y filtros por categoría y estado. Desde aquí agregas al carro, creas piezas nuevas e imprimes etiquetas QR.'],
+  ['kits','Drum Kits · baterías armadas','Cada kit agrupa sus piezas. Puedes llevar el kit completo o solo algunos componentes, y crear kits nuevos.'],
+  ['guitar','Guitarra y Bajo · amplificación','Cabezales y gabinetes separados por instrumento, con el detalle de cada pieza a la vista para agregarla al carro.'],
+  ['scan','Escanear QR · identifica una pieza','Usa la cámara, una foto o escribe el código de la etiqueta para ver el estado de la pieza y moverla.'],
+  ['totem','Tótem técnicos · autoservicio','El cartel de la bodega: cada técnico lo escanea con su celular para sacar, recibir o mover equipos con su nombre.'],
+  ['crew','Técnicos · el equipo','Perfiles con foto, email y teléfono para ubicarlos rápido. Aquí agregas o eliminas técnicos.'],
+  ['maintenance','Mantenimiento · daños y faltantes','Las piezas en revisión o perdidas aparecen aquí hasta que se reparan o se recuperan.'],
+  ['reports','Reportes · el historial','Quién movió qué y cuándo, con filtros y exportación de datos.'],
+  ['settings','Ajustes · configuración','Técnicos, usuarios y roles, tu contraseña, copias de datos, tamaño de letra y animaciones, incluido el barrido al entrar a cada pantalla.']
+];
+const MOBILE_NAV=['dashboard','inventory','scan','kits','events'];
+function menuSteps(){
+  const mobile=typeof matchMedia==='function'&&matchMedia('(max-width: 640px)').matches;
+  const link=path=>`.nav a[data-nav="${path}"], .mobile-nav a[data-nav="${path}"]`;
+  const steps=[mobile
+    ?{route:'dashboard',target:'.mobile-nav',title:'Tu menú de abajo',text:'En el celular, las secciones de uso diario están en esta barra. La sección activa se marca en dorado.'}
+    :{route:'dashboard',target:'.sidebar .nav',title:'Tu menú lateral',text:'A la izquierda están todas las secciones. «Trabajo diario» reúne lo que usas en cada salida; «Más herramientas», lo de apoyo y configuración. La sección activa se marca en dorado.'}];
+  const items=mobile?MOBILE_NAV.map(k=>MENU.find(m=>m[0]===k)):MENU;
+  for(const [path,title,text] of items)steps.push({route:'dashboard',target:link(path),title,text});
+  if(mobile)steps.push({route:'dashboard',target:'.mobile-more-btn',title:'Más herramientas',text:'Tótem técnicos, Técnicos, Mantenimiento, Reportes y Ajustes están en este botón. Guitarra y Bajo se abren desde Equipos. En Ajustes → Ayuda de la aplicación puedes repetir este recorrido.'});
+  else steps.push({route:'dashboard',target:'.sidebar-help, .tour-help-btn',title:'Ayuda y tour guiado',text:'Vuelve a abrir este recorrido cuando quieras desde aquí.'});
+  return steps;
+}
 export function createGuidedTour({getState,getMode=()=> 'demo',onStart=()=>{},onEnd=()=>{}}){
   let root=null,index=0,steps=[],origin=null,target=null,frame=0,invitation=null,offered=false,previousInert=false;
   const read=()=>{try{return localStorage.getItem(KEY);}catch{return null;}};
@@ -11,6 +38,7 @@ export function createGuidedTour({getState,getMode=()=> 'demo',onStart=()=>{},on
     const state=getState(),kit=state.kits[0],event=state.events.find(e=>e.items.some(i=>['reserved','out','missing'].includes(i.status)))||state.events[0];
     return [
       {route:'dashboard',target:'.operations-hero',title:'Bienvenido a la bodega',text:'Este recorrido explica cómo reservar, sacar y recibir el backline. Solo te muestra las pantallas: el tour no mueve ni modifica equipos.',hint:'Puedes salir en cualquier momento. Tus selecciones se conservarán.'},
+      ...menuSteps(),
       {route:'dashboard',target:'.metrics',title:'El estado de un vistazo',text:'Estos contadores muestran equipos reales de tu inventario: disponibles, en eventos y en reparación. Cada tambor y cada fierro se cuenta una sola vez, aunque pertenezca a un kit.'},
       {route:'inventory',target:'.inventory-toolbar',title:'Encuentra una pieza rápidamente',text:'Busca por nombre, código, marca o modelo. También puedes combinar una categoría con un estado. El número junto a cada pestaña indica cuántas piezas muestra.'},
       {route:'inventory',target:'.inventory-panel',title:'Una identidad por pieza',text:'Cada fila tiene código, estado, ubicación, evento y kit. Marca piezas disponibles para preparar una salida. El botón QR abre su etiqueta para imprimirla.',hint:'Reservar una pieza la bloquea para otros eventos; todavía no registra su salida física.'},
@@ -33,7 +61,7 @@ export function createGuidedTour({getState,getMode=()=> 'demo',onStart=()=>{},on
   function offer(){
     if(offered||read()||root)return;offered=true;
     invitation=document.createElement('aside');invitation.className='tour-invitation';invitation.setAttribute('aria-label','Bienvenida y tour guiado');
-    invitation.innerHTML=`<button class="tour-invite-close" aria-label="Cerrar invitación al tour">×</button><span class="tour-invite-icon">?</span><div><strong>Conoce tu nueva bodega.</strong><p>Un recorrido de 2 minutos para aprender a reservar, escanear y mover equipos.</p><div class="tour-invite-actions"><button class="btn primary" data-invite-start>Iniciar tour</button><button class="btn ghost" data-invite-later>Más tarde</button></div></div>`;
+    invitation.innerHTML=`<button class="tour-invite-close" aria-label="Cerrar invitación al tour">×</button><span class="tour-invite-icon">?</span><div><strong>Conoce tu nueva bodega.</strong><p>Un recorrido de 3 minutos para aprender a reservar, escanear y mover equipos.</p><div class="tour-invite-actions"><button class="btn primary" data-invite-start>Iniciar tour</button><button class="btn ghost" data-invite-later>Más tarde</button></div></div>`;
     invitation.querySelector('[data-invite-start]').addEventListener('click',start);
     invitation.querySelector('[data-invite-later]').addEventListener('click',dismissInvitation);
     invitation.querySelector('.tour-invite-close').addEventListener('click',dismissInvitation);
@@ -56,7 +84,7 @@ export function createGuidedTour({getState,getMode=()=> 'demo',onStart=()=>{},on
     cancelAnimationFrame(frame);
     frame=requestAnimationFrame(()=>requestAnimationFrame(()=>{
       if(!root)return;
-      target=document.querySelector(step.target);target?.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});
+      target=[...document.querySelectorAll(step.target)].find(e=>e.getClientRects().length)||null;target?.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});
       position();root.querySelector('.tour-next').focus({preventScroll:true});
     }));
   }
