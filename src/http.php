@@ -84,6 +84,19 @@ try {
         try { reply(['state' => $store->command($body['command'] ?? [], $user['name'], $body['revision'])]); }
         catch (DomainError $e) { if ($e->getMessage() === 'CONFLICT') reply(['error' => 'Otro encargado actualizó el inventario. Revisa la selección y vuelve a confirmar.', 'state' => $store->read()], 409); throw $e; }
     }
+    if ($action === 'password_change' && $method === 'POST') {
+        $store->authAttempt(hash('sha256', 'password:' . $user['id']));
+        $body = request_body(); $current = $body['current'] ?? ''; $new = $body['password'] ?? '';
+        require_ok(is_string($current) && is_string($new) && strlen($current) <= 128, 'Datos inválidos.');
+        require_ok(strlen($new) >= 12 && strlen($new) <= 128, 'La contraseña nueva debe tener de 12 a 128 caracteres.');
+        require_ok(!hash_equals($current, $new), 'La contraseña nueva debe ser distinta de la actual.');
+        $q = $store->db->prepare('SELECT password_hash FROM kb_users WHERE id=?'); $q->execute([$user['id']]);
+        require_ok(password_verify($current, (string)$q->fetchColumn()), 'La contraseña actual no es correcta.');
+        $store->db->prepare('UPDATE kb_users SET password_hash=? WHERE id=?')->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
+        // Cierra las otras sesiones de este usuario; la actual sigue abierta.
+        $store->db->prepare('DELETE FROM kb_sessions WHERE user_id=? AND token_hash<>?')->execute([$user['id'], hash('sha256', $_COOKIE['kb_sid'] ?? '')]);
+        reply(['ok' => true]);
+    }
     if ($action === 'users' && $method === 'GET') {
         require_ok($user['role'] === 'admin', 'Solo administración puede ver usuarios.'); reply(['users' => $store->db->query('SELECT id,name,email,role FROM kb_users ORDER BY name')->fetchAll()]);
     }
