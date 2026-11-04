@@ -374,3 +374,17 @@ body .crew-row.crew-row-btn{display:flex;align-items:center;gap:12px;width:100%;
 .report-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 .report-photo span{padding:8px 10px;font-size:14px;font-weight:600}
 .report-photo small{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+/* Afiche del evento */
+.poster-field #posterSlot{display:flex}
+.photo-add.poster-add{width:150px;height:auto;aspect-ratio:3/4}
+.poster-tile{position:relative;margin:0;width:150px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#0e1013}
+.poster-tile img{display:block;width:100%;height:auto;max-height:260px;object-fit:contain}
+.event-card.has-poster{padding-top:0}
+.event-card-poster{margin:0 -23px 16px;height:170px;overflow:hidden;border-bottom:1px solid var(--line);background:#0e1013}
+.event-card-poster img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;transition:transform .35s var(--ease)}
+.event-card:hover .event-card-poster img{transform:scale(1.03)}
+.event-poster-thumb{flex-shrink:0;width:88px;aspect-ratio:3/4;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#0e1013;cursor:zoom-in}
+.event-poster-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.event-poster-thumb + div{flex:1;min-width:0}
+.poster-full{display:block;max-width:100%;max-height:75dvh;margin:auto;border-radius:8px}
+@media(max-width:640px){.event-card-poster{margin:0 -19px 14px;height:150px}.event-poster-thumb{width:64px}.photo-add.poster-add,.poster-tile{width:120px}}

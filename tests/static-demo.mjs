@@ -27,3 +27,15 @@ assert.equal(moved.assets.find(a=>a.id==='TAM-SCM-002-SN').location,'Bodega B');
 assert.throws(()=>applyDemoCommand(demoSeed(),{type:'crew_rename',crewId:'TEC-01',name:''}));assert.equal(applyDemoCommand(demoSeed(),{type:'crew_rename',crewId:'TEC-01',name:'Ana QA'}).crew[0].name,'Ana QA');
 {const t=demoSeed(),ev=t.events[0].id,d=t.events[0].start.slice(0,10);const u=applyDemoCommand(t,{type:'timing_save',eventId:ev,activities:[{id:'AB1',type:'performance',title:'Banda 1',stageId:'S1',start:d+'T20:30',end:d+'T21:30'}]});assert.equal(u.events[0].timing.length,1);assert.throws(()=>applyDemoCommand(t,{type:'timing_save',eventId:ev,activities:[{id:'AB1',type:'performance',title:'X',stageId:'S1',start:d+'T21:30',end:d+'T20:30'}]}));}
 console.log('PASS static demo: counts, no source mutation, duplicate protection, complete kit, partial reserve/dispatch/return, damaged return and audit.');
+{ // Afiche del evento y alta/baja de técnicos en la demo estática
+  const jpg='data:image/jpeg;base64,'+btoa('\xff\xd8\xffafiche');let d=demoSeed();const free=d.assets.find(a=>a.status==='available'&&a.condition==='ok').id;
+  const base={type:'create_event',name:'Afiche QA',place:'Sala',responsible:'QA',start:'2030-01-01T10:00',end:'2030-01-02T10:00',assetIds:[free]};
+  assert.throws(()=>applyDemoCommand(d,{...base,poster:'data:image/png;base64,AAAA'}));
+  d=applyDemoCommand(d,{...base,poster:jpg});const e=d.events.at(-1);assert.equal(e.poster,jpg);
+  d=applyDemoCommand(d,{type:'event_poster',eventId:e.id,poster:''});assert.equal(d.events.at(-1).poster,'');
+  let c=applyDemoCommand(demoSeed(),{type:'crew_add',name:'Ana Rock'});const n=c.crew.length;assert.equal(c.crew.at(-1).active,true);
+  assert.throws(()=>applyDemoCommand(c,{type:'crew_add',name:'ana rock'}));
+  c=applyDemoCommand(c,{type:'crew_remove',crewId:c.crew.at(-1).id});assert.equal(c.crew.at(-1).active,false);
+  c=applyDemoCommand(c,{type:'crew_add',name:'Ana Rock'});assert.equal(c.crew.length,n);assert.equal(c.crew.at(-1).active,true);
+  console.log('PASS static demo: afiche del evento y alta/baja de técnicos.');
+}

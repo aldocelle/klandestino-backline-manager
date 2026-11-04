@@ -54,7 +54,7 @@ export function applyDemoCommand(source,cmd){
       if(cmd.type==='create_event'){
         const name=text(cmd.name),place=text(cmd.place,200),responsible=text(cmd.responsible,120),start=text(cmd.start,30),end=text(cmd.end,30);
         ok(name&&place&&responsible,'Completa evento, destino y responsable.');ok(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(start)&&Number.isFinite(Date.parse(start))&&Date.parse(end)>Date.parse(start),'La devolución debe ser posterior a la salida.');
-        eventId=uid('EVT');e={id:eventId,name,place,responsible,start,end,vehicle:text(cmd.vehicle,120),driver:text(cmd.driver||'',120),responsiblePhone:phone(cmd.responsiblePhone),driverPhone:phone(cmd.driverPhone),service:text(cmd.service||'Backline',80),items:[]};s.events.push(e);
+        eventId=uid('EVT');e={id:eventId,name,place,responsible,start,end,vehicle:text(cmd.vehicle,120),driver:text(cmd.driver||'',120),responsiblePhone:phone(cmd.responsiblePhone),driverPhone:phone(cmd.driverPhone),service:text(cmd.service||'Backline',80),poster:cmd.poster?jpeg(cmd.poster,260000):'',items:[]};s.events.push(e);
       }else{eventId=cmd.eventId;e=event(eventId);ok(Date.parse(e.end)>Date.now(),'Este evento ya terminó.');}
       for(const id of ids){const a=asset(id);a.status='reserved';a.eventId=eventId;e.items.push({assetId:id,status:'reserved',condition:'ok',note:''});}
       summary=ids.length+' equipos reservados para '+e.name;break;
@@ -80,6 +80,7 @@ export function applyDemoCommand(source,cmd){
       for(const id of ids){const a=asset(id);ok(ready?a.status==='maintenance':a.status==='available','El equipo no admite ese cambio de mantenimiento.');a.status=ready?'available':'maintenance';a.condition=ready?'ok':'review';a.location=ready?homeOf(a):'Taller';a.note=note;}
       summary=ready?'Revisión técnica completada':'Equipos enviados a mantenimiento';break;
     }
+    case 'event_poster':{const e=event(cmd.eventId);eventId=e.id;e.poster=cmd.poster?jpeg(cmd.poster,260000):'';summary=(e.poster?'Afiche actualizado: ':'Afiche quitado: ')+e.name;break;}
     case 'event_update':{
       const e=event(cmd.eventId);eventId=e.id;const status=cmd.status||e.status||'planning';ok(TM_EVENT_STATUS.includes(status),'Estado de evento inválido.');
       const sm=text(cmd.stageManagerId||'',20);if(sm)crewName(s,sm);const raw=cmd.stages||stagesOf(e);ok(Array.isArray(raw)&&raw.length>=1&&raw.length<=8,'Define entre 1 y 8 escenarios.');
@@ -97,6 +98,9 @@ export function applyDemoCommand(source,cmd){
         return {id,type:a.type,title,stageId:a.stageId,start:a.start,end:a.end,responsibleId:resp,artist:text(a.artist||'',120),description:text(a.description||'',1000),status,actualStart:prev[id]?.actualStart??null,actualEnd:prev[id]?.actualEnd??null};});
       out.sort((x,y)=>x.start.localeCompare(y.start)||x.end.localeCompare(y.end));e.timing=out;summary='Run of Show actualizado: '+out.length+' actividades · '+e.name;break;
     }
+    case 'crew_add':{const crew=structuredClone(crewOf(s)),name=text(cmd.name,80);ok(name,'Escribe el nombre del técnico.');const low=name.toLocaleLowerCase('es'),same=crew.find(t=>t.name.toLocaleLowerCase('es')===low);ok(!same||same.active===false,'Ya hay un técnico con ese nombre.');ok(crew.filter(t=>t.active!==false).length<60,'Llegaste al máximo de 60 técnicos.');
+      if(same){same.active=true;same.name=name;summary='Técnico reincorporado: '+name;}else{const max=Math.max(0,...crew.map(t=>+(/^TEC-(\d+)$/.exec(t.id)||[])[1]||0));crew.push({id:'TEC-'+String(max+1).padStart(2,'0'),name,active:true});summary='Técnico agregado: '+name;}s.crew=crew;break;}
+    case 'crew_remove':{const crew=structuredClone(crewOf(s)),t=crew.find(t=>t.id===cmd.crewId&&t.active!==false);ok(t,'Técnico no encontrado.');t.active=false;ok(crew.some(x=>x.active!==false),'Debe quedar al menos un técnico.');s.crew=crew;summary='Técnico eliminado: '+t.name;break;}
     case 'crew_rename':{
       const crew=structuredClone(crewOf(s)),name=text(cmd.name,80),t=crew.find(t=>t.id===cmd.crewId);ok(name,'Escribe el nombre del técnico.');ok(t,'Técnico no encontrado.');
       ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');t.name=name;s.crew=crew;summary='Equipo técnico actualizado: '+name;break;

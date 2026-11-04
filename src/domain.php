@@ -20,6 +20,7 @@ function default_crew(): array { $c = []; for ($n = 1; $n <= 10; $n++) $c[] = ['
 function crew_list(array $state): array { return isset($state['crew']) && is_array($state['crew']) && $state['crew'] ? $state['crew'] : default_crew(); }
 function crew_name(array $state, mixed $id): string { foreach (crew_list($state) as $t) if ($t['id'] === $id && ($t['active'] ?? true)) return $t['name']; throw new DomainError('Elige el técnico responsable.'); }
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
+function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
 /** Event Timing: tipos y estados del Run of Show. */
@@ -110,7 +111,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.');
                 $eventId = $newId('EVT');
                 $state['events'][] = ['id' => $eventId, 'name' => $name, 'place' => $place, 'start' => $start, 'end' => $end,
-                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'items' => []];
+                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'poster' => clean_poster($cmd['poster'] ?? ''), 'items' => []];
                 $ei = count($state['events']) - 1;
             } else { $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); require_ok(strtotime($state['events'][$ei]['end']) > time(), 'Este evento ya terminó.'); }
             foreach ($ids as $id) {
@@ -156,6 +157,10 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $a['location'] = $ready ? home_of($a) : 'Taller'; $a['note'] = $note; unset($a);
             }
             $summary = $ready ? 'Revisión técnica completada' : 'Equipos enviados a mantenimiento'; break;
+        case 'event_poster':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $eventId = $state['events'][$ei]['id'];
+            $state['events'][$ei]['poster'] = clean_poster($cmd['poster'] ?? '');
+            $summary = ($state['events'][$ei]['poster'] === '' ? 'Afiche quitado: ' : 'Afiche actualizado: ') . $state['events'][$ei]['name']; break;
         case 'event_update':
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
             $status = $cmd['status'] ?? ($e['status'] ?? 'planning'); require_ok(in_array($status, timing_event_statuses(), true), 'Estado de evento inválido.');
@@ -206,6 +211,20 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 if (array_key_exists('photo', $cmd)) $t['photo'] = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000);
             } unset($t);
             require_ok($found, 'Técnico no encontrado.'); $state['crew'] = $crew; $summary = 'Perfil de técnico actualizado: ' . $name; break;
+        case 'crew_add':
+            $crew = crew_list($state); $name = clean_text($cmd['name'] ?? '', 80); require_ok($name !== '', 'Escribe el nombre del técnico.');
+            $back = null; $max = 0;
+            foreach ($crew as $i => $t) { if (mb_strtolower($t['name']) === mb_strtolower($name)) { require_ok(!($t['active'] ?? true), 'Ya hay un técnico con ese nombre.'); $back = $i; } if (preg_match('/^TEC-(\d+)$/', $t['id'], $m)) $max = max($max, (int)$m[1]); }
+            require_ok(count(array_filter($crew, fn($t) => $t['active'] ?? true)) < 60, 'Llegaste al máximo de 60 técnicos.');
+            if ($back !== null) { $crew[$back]['active'] = true; $crew[$back]['name'] = $name; $summary = 'Técnico reincorporado: ' . $name; }
+            else { $crew[] = ['id' => sprintf('TEC-%02d', $max + 1), 'name' => $name, 'active' => true]; $summary = 'Técnico agregado: ' . $name; }
+            $state['crew'] = $crew; break;
+        case 'crew_remove':
+            $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $found = false;
+            foreach ($crew as &$t) if ($t['id'] === $tid && ($t['active'] ?? true)) { $t['active'] = false; $found = true; $name = $t['name']; } unset($t);
+            require_ok($found, 'Técnico no encontrado.');
+            require_ok(count(array_filter($crew, fn($t) => $t['active'] ?? true)) >= 1, 'Debe quedar al menos un técnico.');
+            $state['crew'] = $crew; $summary = 'Técnico eliminado: ' . $name; break;
         case 'crew_photo':
             $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $photo = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000); $found = false;
             foreach ($crew as &$t) if ($t['id'] === $tid) { $t['photo'] = $photo; $found = true; $name = $t['name']; } unset($t);
