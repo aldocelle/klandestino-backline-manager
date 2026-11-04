@@ -22,6 +22,10 @@ function crew_name(array $state, mixed $id): string { foreach (crew_list($state)
 function clean_phone(mixed $value): string { $v = clean_text($value, 40); require_ok($v === '' || (bool)preg_match('/^\+?[0-9 ()-]{6,20}$/', $v), 'Revisa el teléfono: usa solo números, espacios y +.'); return $v; }
 function code_taken(array $state, string $code, ?string $exceptId = null): bool { foreach ($state['assets'] as $a) if ($a['id'] !== $exceptId && ($a['id'] === $code || ($a['code'] ?? '') === $code)) return true; foreach ($state['kits'] as $k) if ($k['id'] === $code) return true; return false; }
 function clean_code(mixed $code): string { $code = strtoupper(clean_text($code ?? '', 60)); require_ok((bool)preg_match('/^[A-Z0-9][A-Z0-9_-]{2,59}$/D', $code), 'Usa un código de 3 a 60 letras, números o guiones.'); return $code; }
+function equipment_icon_keys(): array { return ['kit','kick','snare','tom','floor-tom','cymbal','hihat','stand','boom','snare-stand','throne','pedal','clamp','head','cabinet','combo','guitar','bass','pedalboard','di','mic','cable','case','wedge','keyboard','fan','rug']; }
+function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon) ? trim($icon) : ''; if ($icon === '') return '';
+    if (preg_match('/^photo:(\d)$/D', $icon, $m)) { require_ok((int)$m[1] < count($asset['photos'] ?? []), 'Esa foto ya no existe.'); return $icon; }
+    require_ok(in_array($icon, equipment_icon_keys(), true), 'Ícono inválido.'); return $icon; }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
 function clean_jpeg(mixed $photo, int $max): string { require_ok(is_string($photo) && strlen($photo) < $max && str_starts_with($photo, 'data:image/jpeg;base64,'), 'La foto debe ser JPEG y liviana.'); $bytes = base64_decode(substr($photo, 23), true); require_ok($bytes !== false && str_starts_with($bytes, "\xFF\xD8\xFF"), 'Foto inválida.'); return $photo; }
@@ -65,8 +69,12 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 'brand' => clean_text($cmd['brand'] ?? '', 80), 'model' => clean_text($cmd['model'] ?? '', 100),
                 'serial' => clean_text($cmd['serial'] ?? '', 100), 'note' => clean_text($cmd['note'] ?? '', 500)]);
             $ids = [$state['assets'][$ai]['id']]; $summary = 'Detalle actualizado: ' . $name; break;
+        case 'asset_icon':
+            $ai = entity_index($state['assets'], (string)($cmd['assetId'] ?? '')); $state['assets'][$ai]['icon'] = clean_icon($cmd['icon'] ?? '', $state['assets'][$ai]);
+            $ids = [$state['assets'][$ai]['id']]; $summary = 'Ícono actualizado: ' . $state['assets'][$ai]['name']; break;
         case 'asset_photos':
             $ai = entity_index($state['assets'], (string)($cmd['assetId'] ?? '')); $state['assets'][$ai]['photos'] = clean_photos($cmd['photos'] ?? []);
+            if (preg_match('/^photo:(\d)$/D', $state['assets'][$ai]['icon'] ?? '', $m) && (int)$m[1] >= count($state['assets'][$ai]['photos'])) $state['assets'][$ai]['icon'] = '';
             $ids = [$state['assets'][$ai]['id']]; $summary = 'Fotos actualizadas: ' . $state['assets'][$ai]['name']; break;
         case 'create_kit':
             $ids = selected_ids($cmd); $name = clean_text($cmd['name'] ?? '');

@@ -404,3 +404,18 @@ button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
 .intro-pulse{animation:intro-pulse .75s ease-out}
 [data-motion="off"] .intro-pulse{animation:none}
 @media(prefers-reduced-motion:reduce){.intro-pulse{animation:none}}
+/* Galería de íconos de equipo */
+.hero-btns{position:absolute;right:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hero-btns .hero-photo-btn{position:static}
+.icon-group{font-size:15px;margin:18px 0 8px;color:var(--muted);letter-spacing:.5px}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px}
+.icon-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:#16181b;color:inherit;font:inherit;font-size:12px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.icon-opt:hover{border-color:#8a7440;background:#1c1f23;transform:translateY(-1px)}
+.icon-opt.active{border-color:var(--gold);background:#2a2418;box-shadow:0 0 0 1px var(--gold) inset}
+.icon-opt-art{width:84px;height:58px;display:grid;place-items:center;overflow:hidden;border-radius:6px}
+.icon-opt-art .equipment-svg{width:84px;height:58px}
+.icon-opt-art img{width:100%;height:100%;object-fit:cover}
+.icon-opt span{text-align:center;line-height:1.2}
+@media(max-width:640px){.icon-grid{grid-template-columns:repeat(3,1fr)}.hero-btns .hero-photo-btn{font-size:13px;padding:0 12px}}
+.asset-hero:not(.has-photo){height:auto;min-height:160px;padding:14px 0 12px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.asset-hero:not(.has-photo) .hero-btns{position:static;justify-content:center}

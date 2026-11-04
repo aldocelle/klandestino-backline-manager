@@ -39,5 +39,6 @@ console.log('PASS static demo: counts, no source mutation, duplicate protection,
   c=applyDemoCommand(c,{type:'crew_add',name:'Ana Rock'});assert.equal(c.crew.length,n);assert.equal(c.crew.at(-1).active,true);
   {let t=demoSeed();const a=t.assets[0],o=t.assets[1];t=applyDemoCommand(t,{type:'asset_update',assetId:a.id,name:a.name,category:a.category,code:'nuevo-cod-01'});const n=t.assets.find(x=>x.id===a.id);assert.equal(n.code,'NUEVO-COD-01');
    assert.throws(()=>applyDemoCommand(t,{type:'asset_update',assetId:a.id,name:a.name,category:a.category,code:o.code}));assert.throws(()=>applyDemoCommand(t,{type:'create_asset',code:a.id,name:'Copia',category:'Accesorios',location:'Bodega A'}));}
+  {let t=demoSeed();const a=t.assets[0];t=applyDemoCommand(t,{type:'asset_icon',assetId:a.id,icon:'kick'});assert.equal(t.assets[0].icon,'kick');assert.throws(()=>applyDemoCommand(t,{type:'asset_icon',assetId:a.id,icon:'nave'}));assert.throws(()=>applyDemoCommand(t,{type:'asset_icon',assetId:a.id,icon:'photo:0'}));}
   console.log('PASS static demo: afiche del evento y alta/baja de técnicos.');
 }
