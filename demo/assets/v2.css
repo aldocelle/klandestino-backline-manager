@@ -399,3 +399,8 @@ button.event-poster-thumb.is-default:hover{opacity:1;border-color:var(--gold)}
   tbody tr:not(.branch-row):not(.in-cart):hover>td{background-color:#ffffff12}
   tbody tr.group-row:not(.open):hover>td{background-color:#25282d}
 }
+/* Encendido progresivo de botones al entrar a Equipos */
+@keyframes intro-pulse{0%{box-shadow:0 0 0 0 #e0ae4500}35%{box-shadow:0 0 0 2px var(--gold),0 0 20px #e0ae4570;filter:brightness(1.3)}100%{box-shadow:0 0 0 0 #e0ae4500;filter:none}}
+.intro-pulse{animation:intro-pulse .75s ease-out}
+[data-motion="off"] .intro-pulse{animation:none}
+@media(prefers-reduced-motion:reduce){.intro-pulse{animation:none}}
