@@ -270,7 +270,6 @@ document.addEventListener('click', async ev=>{
     case 'wiz-confirm':{const ids=wizPicks().map(a=>a.id),ev=wiz.eventId,k=wiz.kitId;await command({type:'reserve',eventId:ev,assetIds:ids},`${ids.length} piezas reservadas para ${eventById(ev)?.name||'el evento'}.`,()=>{wiz=null;kitEventId=ev;ids.forEach(i=>selected.delete(i));updateSelection();});break;}
     case 'kit-view':kitByPiece=el.dataset.mode==='piece';render();break;
     case 'kit-load-all':{openKitWizard(id);break;}
-    case 'kit-load-all-legacy':{kitByPiece=true;kitParts(id).filter(available).forEach(a=>selected.add(a.id));render();$('#kitSelection')?.scrollIntoView({behavior:isReduced()?'instant':'smooth',block:'nearest'});break;}
     case 'identify-part':lookup(id);break;
     case 'kit-select-scanned':{if(!available(byId(id)))throw new Error('La pieza ya no está disponible.');kitByPiece=true;selected.add(id);render();toast('Componente seleccionado para el evento. Confirma la reserva.');break;}
     case 'kit-clear-selection':kitParts(id).forEach(a=>selected.delete(a.id));updateSelection();break;

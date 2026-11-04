@@ -51,6 +51,8 @@ En móvil, «Escanear» es el botón central de la barra inferior: abre el visor
 
 Para separar un kit, la ficha agrupa los componentes en Tambores, Atriles, Hi-hat y Pedales/soportes/sillín, con atajos «Todo el kit», «Solo tambores», «Solo fierros» y «Elegir grupo». Tambores y fierros del mismo kit pueden ir a eventos distintos; el kit solo se rearma cuando vuelven todas sus piezas. En móvil, una barra fija muestra cuántas piezas están elegidas y lleva a reservar.
 
+«Preparar salida» en la ficha de kit abre un asistente con preguntas y opciones: qué llevar (kit completo, solo tambores, solo fierros o por grupo con ajuste pieza a pieza), para qué evento (vigentes o salida nueva) y un resumen antes de reservar.
+
 Hay dos bodegas, nombradas solo «Bodega A» y «Bodega B»; la app no guarda sus direcciones. Cada pieza tiene una bodega base: al volver de un evento o del taller regresa a ella. «Trasladar» (en la selección del inventario y en la ficha de kit) mueve piezas disponibles entre bodegas y queda en el historial; un kit trasladado completo sigue armado. El inventario filtra por bodega o «Fuera de bodega».
 
 La ficha de kit recupera la composición del prototipo `kit-tama.html`: perfil, desglose individual y escáner/armado de salida en tres columnas. Permite reservar, despachar y devolver componentes desde la ficha; los estados y cantidades se calculan del inventario real. La ficha combina ilustraciones del equipo y el fondo local de bodega, sin depender de fotografías externas. El acceso `/kit-tama.html` abre la ficha del primer Tama en el servidor PHP.
