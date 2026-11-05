@@ -661,3 +661,16 @@ button.settings-utility{width:100%;text-align:left;font:inherit;cursor:pointer}
 /* ===== Equipos: sin pestañas de estado; aviso cuando se llega filtrado ===== */
 .inv-status-filter{align-items:center;margin:4px 0 12px}
 .inv-status-filter span{flex:1}
+
+/* ===== Llegada a bodega (#arrival): escaneo con el celular, cada pieza se guarda al instante ===== */
+.task-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.task-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.task-grid{grid-template-columns:1fr}}
+.arrival .arrival-progress{margin:4px 0 14px}
+.arrival .arrival-progress .btn{width:100%;justify-content:center}
+.arrival-damage{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#15171a}
+.arrival-damage span{display:grid;gap:2px}
+.arrival-damage small{color:var(--muted);font-size:12px}
+.arrival-h{font-size:16px;margin:18px 0 8px}
+.totem-row.arrived{opacity:.85}
+.arrival-ok{color:#69d69b;display:grid;place-items:center}
