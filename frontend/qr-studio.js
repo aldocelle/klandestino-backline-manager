@@ -18,7 +18,7 @@ const PAPERS = {
 };
 const SIZES = [
   ['xs','Mini',25,30,'Cables y micrófonos'],
-  ['s','Pequeña',38,46,'Accesorios y pedales'],
+  ['s','Pequeña',38,46,'Accesorios y platillos'],
   ['m','Mediana',50,62,'Tambores, atriles y cases'],
   ['l','Grande',70,88,'Gabinetes y kits'],
   ['w','Apaisada',62,29,'Rollo de 62 mm'],
