@@ -486,3 +486,7 @@ td.status-cell{transition:background-color .2s}
 @media(max-width:640px){.topbar .mobile-more-btn{display:none!important}}
 @media(max-width:380px){.mobile-brand .brand-name{font-size:16px}.top-right{gap:4px!important}.cart-btn{padding:0 8px!important}.topbar{padding:0 10px!important}}
 @media(max-width:340px){.nav-clock{display:none!important}}
+/* Celular: el menú de usuario también lleva a las secciones que no caben en la barra de abajo. */
+.user-menu-more{display:none}
+.user-menu-label{display:block;padding:10px 10px 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+@media(max-width:640px){.user-menu-more{display:block;margin-top:4px;padding-top:4px;border-top:1px solid var(--line)}.user-menu{max-height:calc(100vh - 140px);overflow-y:auto}}
