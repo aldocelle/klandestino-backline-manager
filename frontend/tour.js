@@ -16,16 +16,17 @@ const MENU=[
   ['reports','Reportes · el historial','Quién movió qué y cuándo, con filtros y exportación de datos.'],
   ['settings','Ajustes · configuración','Técnicos, usuarios y roles, tu contraseña, copias de datos, tamaño de letra y animaciones, incluido el barrido al entrar a cada pantalla.']
 ];
-const MOBILE_NAV=['dashboard','inventory','scan','kits','events'];
+const MOBILE_NAV=['dashboard','inventory','scan','events'];
 function menuSteps(){
   const mobile=typeof matchMedia==='function'&&matchMedia('(max-width: 640px)').matches;
   const link=path=>`.nav a[data-nav="${path}"], .mobile-nav a[data-nav="${path}"]`;
   const steps=[mobile
-    ?{route:'dashboard',target:'.mobile-nav',title:'Tu menú de abajo',text:'En el celular, las secciones de uso diario están en esta barra. La sección activa se marca en dorado.'}
+    ?{route:'dashboard',target:'.mobile-nav',title:'Tu menú de abajo',text:'En el celular, lo de uso diario está en esta barra: Inicio, Equipos, Escanear y Eventos. La sección activa se marca en dorado.'}
     :{route:'dashboard',target:'.sidebar .nav',title:'Tu menú lateral',text:'A la izquierda están todas las secciones. «Trabajo diario» reúne lo que usas en cada salida; «Más herramientas», lo de apoyo y configuración. La sección activa se marca en dorado.'}];
   const items=mobile?MOBILE_NAV.map(k=>MENU.find(m=>m[0]===k)):MENU;
   for(const [path,title,text] of items)steps.push({route:'dashboard',target:link(path),title,text});
-  if(mobile)steps.push({route:'dashboard',target:'#userBtn',title:'Tu menú y más herramientas',text:'Toca tu foto o tus iniciales: ahí están tu perfil, Ajustes (con tótem, técnicos, mantenimiento y reportes), cambiar de usuario y cerrar sesión. Guitarra y Bajo se abren desde Equipos. En Ajustes → Ayuda puedes repetir este recorrido.'});
+  if(mobile){steps.push({route:'dashboard',target:'#moreTab',title:'Más · todas las secciones',text:'Aquí están Drum Kits, Guitarra, Bajo, Tótem técnicos, Técnicos, Mantenimiento, Reportes, Ajustes y la ayuda para repetir este recorrido.'});
+    steps.push({route:'dashboard',target:'#userBtn',title:'Tu menú de usuario',text:'Toca tu foto o tus iniciales para ver tu perfil, ir a Ajustes, cambiar de usuario o cerrar sesión.'});}
   else{steps.push({route:'dashboard',target:'#userBtn',title:'Tu menú de usuario',text:'Toca tu foto o tus iniciales para ver tu perfil, ir a Ajustes, cambiar de usuario o cerrar sesión.'});steps.push({route:'dashboard',target:'.sidebar-help, .tour-help-btn',title:'Ayuda y tour guiado',text:'Vuelve a abrir este recorrido cuando quieras desde aquí.'});}
   return steps;
 }
