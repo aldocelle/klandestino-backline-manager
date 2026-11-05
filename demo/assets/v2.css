@@ -674,3 +674,11 @@ button.settings-utility{width:100%;text-align:left;font:inherit;cursor:pointer}
 .arrival-h{font-size:16px;margin:18px 0 8px}
 .totem-row.arrived{opacity:.85}
 .arrival-ok{color:#69d69b;display:grid;place-items:center}
+
+/* ===== Fondo de pantalla: parche Klandestino Inc (mismo archivo que la pantalla de descanso del tótem) ===== */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:url(totem-descanso.jpg) center/contain no-repeat;opacity:.13}
+@media(min-width:901px){body::before{left:248px;inset-block:72px 0}}
+.auth-screen{background:linear-gradient(#08090bc2,#08090bc2),url(totem-descanso.jpg) center/contain no-repeat,#000}
+@media print{body::before{display:none}}
+.operations-hero:before{background:url(totem-descanso.jpg) right 6% center/auto 130% no-repeat;opacity:.42}
+@media(max-width:900px){.operations-hero:before{background-position:center;background-size:cover;opacity:.2}}
