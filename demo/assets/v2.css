@@ -680,5 +680,3 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media(min-width:901px){body::before{left:248px;inset-block:72px 0}}
 .auth-screen{background:linear-gradient(#08090bc2,#08090bc2),url(totem-descanso.jpg) center/contain no-repeat,#000}
 @media print{body::before{display:none}}
-.operations-hero:before{background:url(totem-descanso.jpg) right 6% center/auto 130% no-repeat;opacity:.42}
-@media(max-width:900px){.operations-hero:before{background-position:center;background-size:cover;opacity:.2}}
