@@ -30,6 +30,12 @@ function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon
 function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status', 'event_trash', 'event_restore']; }
 function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
 function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
+// Finalizado: aún no se cierra, pero ya pasó su devolución programada o volvieron todas sus piezas.
+function event_finished(array $e): bool {
+    if (!empty($e['trashed']) || ($e['status'] ?? '') === 'done') return false;
+    $items = array_filter($e['items'], fn($it) => $it['status'] !== 'released');
+    return strtotime($e['end']) < time() || ($items && !array_filter($items, fn($it) => $it['status'] !== 'returned'));
+}
 // Explica qué piezas impiden cerrar o eliminar un evento, con sus nombres y qué hacer con ellas.
 function event_blockers(array $state, array $e, array $kinds): string {
     $names = []; foreach ($state['assets'] as $a) $names[$a['id']] = $a['name'];
@@ -184,8 +190,8 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $summary = 'Evento restaurado: ' . $state['events'][$ei]['name']; break;
         case 'event_purge':
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $gone = $state['events'][$ei]; $eventId = $gone['id'];
-            // Desde Borradores o Archivados, sin piezas pendientes. Los movimientos se conservan como historial.
-            require_ok(!empty($gone['trashed']) || ($gone['status'] ?? '') === 'done', 'Primero borra o cierra el evento: solo se eliminan los de Borradores o Archivados.');
+            // Desde Borradores, Finalizados o Archivados, sin piezas pendientes. Los movimientos se conservan como historial.
+            require_ok(!empty($gone['trashed']) || ($gone['status'] ?? '') === 'done' || event_finished($gone), 'Primero borra o cierra el evento: solo se eliminan los de Borradores, Finalizados o Archivados.');
             require_ok(($why = event_blockers($state, $gone, ['reserved', 'out', 'missing'])) === '', 'No se puede eliminar todavía: ' . $why . '.');
             foreach ($state['assets'] as $a) require_ok(($a['eventId'] ?? null) !== $eventId, 'Este evento tiene piezas reservadas, fuera o faltantes. Resuélvelas antes de eliminarlo.');
             array_splice($state['events'], $ei, 1); $summary = 'Evento eliminado definitivamente: ' . $gone['name']; break;
