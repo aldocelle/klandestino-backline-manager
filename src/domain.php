@@ -27,7 +27,10 @@ function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon
     if (preg_match('/^photo:(\d)$/D', $icon, $m)) { require_ok((int)$m[1] < count($asset['photos'] ?? []), 'Esa foto ya no existe.'); return $icon; }
     require_ok(in_array($icon, equipment_icon_keys(), true), 'Ícono inválido.'); return $icon; }
 // Permisos por rol: administrador y encargado, todo; técnico, solo el trabajo diario de bodega; consulta, nada.
-function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer']; }
+function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status']; }
+function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
+function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
+function check_event_dates(string $start, string $end): void { require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.'); }
 function role_allows(string $role, string $type): bool { if (in_array($role, ['admin', 'operator'], true)) return true; return $role === 'tech' && in_array($type, tech_commands(), true); }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
@@ -116,16 +119,17 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $ids = [$state['assets'][$ai]['id']]; $summary = 'Agrupación actualizada: ' . $state['assets'][$ai]['name']; break;
         case 'create_event':
         case 'reserve':
-            $ids = selected_ids($cmd);
+            $draft = $type === 'create_event' && ($cmd['draft'] ?? false) === true && empty($cmd['assetIds']);
+            $ids = $draft ? [] : selected_ids($cmd);
             foreach ($ids as $id) { $ai = entity_index($state['assets'], $id); require_ok($state['assets'][$ai]['status'] === 'available' && $state['assets'][$ai]['condition'] === 'ok', $state['assets'][$ai]['name'] . ' ya está reservado, fuera o en revisión.'); }
             if ($type === 'create_event') {
                 $name = clean_text($cmd['name'] ?? ''); $place = clean_text($cmd['place'] ?? '', 200); $responsible = clean_text($cmd['responsible'] ?? '', 120);
-                require_ok($name !== '' && $place !== '' && $responsible !== '', 'Completa evento, destino y responsable.');
+                require_ok($name !== '' && $place !== '' && ($draft || $responsible !== ''), $draft ? 'Completa el nombre y el destino del evento.' : 'Completa evento, destino y responsable.');
                 $start = clean_text($cmd['start'] ?? '', 30); $end = clean_text($cmd['end'] ?? '', 30);
                 require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.');
                 $eventId = $newId('EVT');
                 $state['events'][] = ['id' => $eventId, 'name' => $name, 'place' => $place, 'start' => $start, 'end' => $end,
-                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'poster' => clean_poster($cmd['poster'] ?? ''), 'items' => []];
+                    'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'poster' => clean_poster($cmd['poster'] ?? ''), 'client' => clean_text($cmd['client'] ?? '', 160), 'address' => clean_text($cmd['address'] ?? '', 200), 'teamIds' => [], 'crewIds' => [], 'items' => []];
                 $ei = count($state['events']) - 1;
             } else { $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); require_ok(strtotime($state['events'][$ei]['end']) > time(), 'Este evento ya terminó.'); }
             foreach ($ids as $id) {
@@ -133,7 +137,41 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $state['assets'][$ai]['status'] = 'reserved'; $state['assets'][$ai]['eventId'] = $eventId;
                 $state['events'][$ei]['items'][] = ['assetId' => $id, 'status' => 'reserved', 'condition' => 'ok', 'note' => ''];
             }
-            $summary = count($ids) . ' equipos reservados para ' . $state['events'][$ei]['name']; break;
+            $summary = $draft ? 'Evento creado: ' . $state['events'][$ei]['name'] : count($ids) . ' equipos reservados para ' . $state['events'][$ei]['name']; break;
+        case 'event_details':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
+            $name = clean_text($cmd['name'] ?? ''); $place = clean_text($cmd['place'] ?? '', 200); require_ok($name !== '' && $place !== '', 'Completa el nombre y el destino del evento.');
+            $start = clean_text($cmd['start'] ?? '', 30); $end = clean_text($cmd['end'] ?? '', 30); check_event_dates($start, $end);
+            $e['name'] = $name; $e['place'] = $place; $e['start'] = $start; $e['end'] = $end; $e['service'] = clean_text($cmd['service'] ?? ($e['service'] ?? 'Backline'), 80);
+            $e['client'] = clean_text($cmd['client'] ?? '', 160); $e['address'] = clean_text($cmd['address'] ?? '', 200);
+            $summary = 'Datos del evento actualizados: ' . $name; unset($e); break;
+        case 'event_staff':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
+            $active = array_column(array_filter(crew_list($state), fn($t) => $t['active'] ?? true), 'id');
+            $sm = clean_text($cmd['stageManagerId'] ?? '', 20); if ($sm !== '') crew_name($state, $sm);
+            $e['responsible'] = clean_text($cmd['responsible'] ?? '', 120); $e['responsiblePhone'] = clean_phone($cmd['responsiblePhone'] ?? '');
+            $e['vehicle'] = clean_text($cmd['vehicle'] ?? '', 120); $e['driver'] = clean_text($cmd['driver'] ?? '', 120); $e['driverPhone'] = clean_phone($cmd['driverPhone'] ?? '');
+            $e['stageManagerId'] = $sm; $e['teamIds'] = clean_ids($cmd['teamIds'] ?? [], array_column(team_list($state), 'id'), 20, 'Revisa los equipos de técnicos.');
+            $e['crewIds'] = clean_ids($cmd['crewIds'] ?? [], $active, 60, 'Revisa los técnicos asignados.');
+            $summary = 'Personal del evento actualizado: ' . $e['name']; unset($e); break;
+        case 'event_status':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $eventId = $state['events'][$ei]['id']; $st = $cmd['status'] ?? '';
+            require_ok(in_array($st, timing_event_statuses(), true), 'Estado de evento inválido.');
+            if ($st === 'done') foreach ($state['events'][$ei]['items'] as $it) require_ok(!in_array($it['status'], ['reserved', 'out'], true), 'Antes de cerrar, registra la salida y la devolución de todos los equipos, o libera las reservas.');
+            $state['events'][$ei]['status'] = $st; $summary = ($st === 'done' ? 'Evento cerrado: ' : 'Estado del evento actualizado: ') . $state['events'][$ei]['name']; break;
+        case 'team_save':
+            $teams = team_list($state); $tid = clean_text($cmd['teamId'] ?? '', 40); $name = clean_text($cmd['name'] ?? '', 80); require_ok($name !== '', 'Escribe el nombre del equipo.');
+            $active = array_column(array_filter(crew_list($state), fn($t) => $t['active'] ?? true), 'id');
+            $members = clean_ids($cmd['memberIds'] ?? [], $active, 40, 'Revisa los integrantes del equipo.'); require_ok(count($members) >= 1, 'Elige al menos un integrante.');
+            foreach ($teams as $t) require_ok($t['id'] === $tid || mb_strtolower($t['name']) !== mb_strtolower($name), 'Ya hay un equipo con ese nombre.');
+            if ($tid !== '') { $ti = entity_index($teams, $tid); $teams[$ti]['name'] = $name; $teams[$ti]['memberIds'] = $members; $summary = 'Equipo de técnicos actualizado: ' . $name; }
+            else { require_ok(count($teams) < 40, 'Llegaste al máximo de 40 equipos.'); $teams[] = ['id' => $newId('TEAM'), 'name' => $name, 'memberIds' => $members]; $summary = 'Equipo de técnicos creado: ' . $name; }
+            $state['teams'] = $teams; break;
+        case 'team_delete':
+            $teams = team_list($state); $ti = entity_index($teams, clean_text($cmd['teamId'] ?? '', 40)); $gone = $teams[$ti];
+            array_splice($teams, $ti, 1); $state['teams'] = $teams;
+            foreach ($state['events'] as &$ev) if (!empty($ev['teamIds'])) $ev['teamIds'] = array_values(array_filter($ev['teamIds'], fn($x) => $x !== $gone['id'])); unset($ev);
+            $summary = 'Equipo de técnicos eliminado: ' . $gone['name']; break;
         case 'dispatch':
         case 'release':
         case 'return':
