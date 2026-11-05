@@ -95,12 +95,6 @@ input,select,textarea{background:#141619;border-color:#35373c;border-radius:4px;
 
 .settings-tools{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.5fr);gap:18px;margin-bottom:18px}
 .settings-section{grid-row:auto}
-.settings-utility-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
-.settings-utility{min-height:92px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);color:var(--text);text-decoration:none;background:var(--panel)}
-.settings-utility:hover,.settings-utility:focus-visible{border-color:var(--gold);background:var(--raised)}
-.settings-utility-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:color-mix(in oklab,var(--gold) 16%,var(--panel));color:var(--gold)}
-.settings-utility strong{display:block;font-size:17px;line-height:1.35}
-.settings-utility small{display:block;margin-top:5px;color:var(--muted);font-size:14px;line-height:1.45}
 body[data-large-text="on"]{font-size:15px}
 body[data-large-text="on"] .btn,body[data-large-text="on"] .settings-utility strong{font-size:17px}
 body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .panel-pad>p{font-size:16px}
@@ -112,6 +106,17 @@ body[data-large-text="on"] .settings-utility small,body[data-large-text="on"] .p
   .kit-profile-title p,.kit-mode-help,.kit-identified .mono,.kit-identified>small,.kit-scan-empty strong,.kit-scan-empty p{font-size:14px}
   .kit-lookup input,#kitEvent{font-size:16px}
 }
+/* Tarjetas de Ajustes (.settings-utility): en todas las pantallas; ajustes de celular en v2.css */
+.settings-utility-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.settings-utility{min-height:92px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);color:var(--text);text-decoration:none;background:var(--panel)}
+.settings-utility:hover,.settings-utility:focus-visible{border-color:var(--gold);background:var(--raised)}
+.settings-utility-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:color-mix(in oklab,var(--gold) 16%,var(--panel));color:var(--gold)}
+.settings-utility strong{display:block;font-size:17px;line-height:1.35}
+.settings-utility small{display:block;margin-top:5px;color:var(--muted);font-size:14px;line-height:1.45}
+/* Con «Texto más grande» la tarjeta crece; #view para ganarle al piso de legibilidad de v2.css (#view small: 13px) */
+body[data-large-text="on"] #view .settings-utility strong{font-size:18px}
+body[data-large-text="on"] #view .settings-utility small{font-size:16px}
+@media(max-width:940px){.settings-utility-grid{grid-template-columns:1fr}}
 
 #inventoryPagination{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 #inventoryPagination label{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--text)}
