@@ -490,3 +490,8 @@ td.status-cell{transition:background-color .2s}
 .user-menu-more{display:none}
 .user-menu-label{display:block;padding:10px 10px 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 @media(max-width:640px){.user-menu-more{display:block;margin-top:4px;padding-top:4px;border-top:1px solid var(--line)}.user-menu{max-height:calc(100vh - 140px);overflow-y:auto}}
+
+/* ── Estado «En evento» clicable → ficha del evento (pedido de la sesión 39) ── */
+a.badge-link{text-decoration:none;cursor:pointer;transition:filter .15s,box-shadow .15s}
+a.badge-link::after{content:"›";margin-left:5px;font-weight:700}
+a.badge-link:hover,a.badge-link:focus-visible{filter:brightness(1.25);box-shadow:0 0 0 2px currentColor;outline:none}
