@@ -30,6 +30,21 @@ function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon
 function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status', 'event_trash', 'event_restore']; }
 function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
 function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
+// Explica qué piezas impiden cerrar o eliminar un evento, con sus nombres y qué hacer con ellas.
+function event_blockers(array $state, array $e, array $kinds): string {
+    $names = []; foreach ($state['assets'] as $a) $names[$a['id']] = $a['name'];
+    $text = ['reserved' => ['sigue reservada sin salir de bodega', 'siguen reservadas sin salir de bodega', 'libera la reserva o registra la salida', 'libera las reservas o registra la salida'],
+        'out' => ['sigue fuera sin devolución', 'siguen fuera sin devolución', 'registra la devolución', 'registra la devolución'],
+        'missing' => ['está reportada como faltante', 'están reportadas como faltantes', 'registra la devolución cuando aparezca', 'registra la devolución cuando aparezcan']];
+    $parts = [];
+    foreach ($kinds as $k) {
+        $list = []; foreach ($e['items'] as $it) if ($it['status'] === $k) $list[] = $names[$it['assetId']] ?? $it['assetId'];
+        $n = count($list); if (!$n) continue;
+        $shown = implode(', ', array_slice($list, 0, 4)) . ($n > 4 ? ' y ' . ($n - 4) . ' más' : '');
+        $parts[] = ($n === 1 ? '1 pieza ' . $text[$k][0] : $n . ' piezas ' . $text[$k][1]) . ' (' . $shown . '): ' . $text[$k][$n === 1 ? 2 : 3];
+    }
+    return implode('; ', $parts);
+}
 function check_event_dates(string $start, string $end): void { require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.'); }
 function role_allows(string $role, string $type): bool { if (in_array($role, ['admin', 'operator'], true)) return true; return $role === 'tech' && in_array($type, tech_commands(), true); }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
@@ -157,7 +172,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
         case 'event_status':
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $eventId = $state['events'][$ei]['id']; $st = $cmd['status'] ?? '';
             require_ok(in_array($st, timing_event_statuses(), true), 'Estado de evento inválido.');
-            if ($st === 'done') foreach ($state['events'][$ei]['items'] as $it) require_ok(!in_array($it['status'], ['reserved', 'out'], true), 'Antes de cerrar, registra la salida y la devolución de todos los equipos, o libera las reservas.');
+            if ($st === 'done') require_ok(($why = event_blockers($state, $state['events'][$ei], ['reserved', 'out'])) === '', 'Antes de cerrar el evento: ' . $why . '.');
             $state['events'][$ei]['status'] = $st; $summary = ($st === 'done' ? 'Evento cerrado: ' : 'Estado del evento actualizado: ') . $state['events'][$ei]['name']; break;
         case 'event_trash':
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
@@ -171,7 +186,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $gone = $state['events'][$ei]; $eventId = $gone['id'];
             // Desde Borradores o Archivados, sin piezas pendientes. Los movimientos se conservan como historial.
             require_ok(!empty($gone['trashed']) || ($gone['status'] ?? '') === 'done', 'Primero borra o cierra el evento: solo se eliminan los de Borradores o Archivados.');
-            foreach ($gone['items'] as $it) require_ok(!in_array($it['status'], ['reserved', 'out', 'missing'], true), 'Este evento tiene piezas reservadas, fuera o faltantes. Resuélvelas antes de eliminarlo.');
+            require_ok(($why = event_blockers($state, $gone, ['reserved', 'out', 'missing'])) === '', 'No se puede eliminar todavía: ' . $why . '.');
             foreach ($state['assets'] as $a) require_ok(($a['eventId'] ?? null) !== $eventId, 'Este evento tiene piezas reservadas, fuera o faltantes. Resuélvelas antes de eliminarlo.');
             array_splice($state['events'], $ei, 1); $summary = 'Evento eliminado definitivamente: ' . $gone['name']; break;
         case 'team_save':

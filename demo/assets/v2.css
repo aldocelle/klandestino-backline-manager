@@ -646,3 +646,14 @@ button.settings-utility{width:100%;text-align:left;font:inherit;cursor:pointer}
   .settings-utility strong{font-size:16px;line-height:1.3}
   .settings-utility small{margin-top:4px;font-size:13px;line-height:1.4}
 }
+
+/* ===== Eventos: por qué no se puede cerrar o eliminar ===== */
+.ev-blockers{align-items:flex-start}
+.ev-blockers>div{display:grid;gap:6px;min-width:0}
+.ev-blockers p{margin:0}
+.ev-blockers ul{margin:4px 0 0;padding-left:18px;display:grid;gap:10px}
+.ev-blockers li .flex{margin-top:6px;gap:8px}
+.ev-blockers.flash{animation:ev-blk-flash .9s ease 2}
+@keyframes ev-blk-flash{50%{border-color:var(--gold);background:#e3a83d26}}
+.btn.is-blocked{opacity:.6}
+@media(prefers-reduced-motion:reduce){.ev-blockers.flash{animation:none}}
