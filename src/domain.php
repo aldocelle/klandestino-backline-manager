@@ -31,6 +31,8 @@ function tech_commands(): array { return ['create_event', 'reserve', 'dispatch',
 function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
 function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
 function check_event_dates(string $start, string $end): void { require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.'); }
+// «Mi foto» la puede cambiar cualquier usuario con sesión, incluso Consulta: solo toca su propia foto (email de la sesión).
+function command_allowed(string $role, string $type): bool { return $type === 'my_photo' || role_allows($role, $type); }
 function role_allows(string $role, string $type): bool { if (in_array($role, ['admin', 'operator'], true)) return true; return $role === 'tech' && in_array($type, tech_commands(), true); }
 function clean_poster(mixed $poster): string { return ($poster === null || $poster === '') ? '' : clean_jpeg($poster, 260000); }
 function clean_photos(mixed $list): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= 3, 'Agrega hasta 3 fotos por pieza.'); return array_values(array_map(fn($p) => clean_jpeg($p, 90000), $list)); }
@@ -294,6 +296,16 @@ function apply_command(array $state, array $cmd, string $actor): array {
             require_ok($found, 'Técnico no encontrado.');
             require_ok(count(array_filter($crew, fn($t) => $t['active'] ?? true)) >= 1, 'Debe quedar al menos un técnico.');
             $state['crew'] = $crew; $summary = 'Técnico eliminado: ' . $name; break;
+        case 'my_photo':
+            // userEmail lo pone el servidor desde la sesión (http.php); el cliente no elige a quién cambiarle la foto.
+            $email = mb_strtolower(trim((string)($cmd['userEmail'] ?? ''))); $key = $email !== '' ? $email : 'demo';
+            $photo = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000);
+            $crew = crew_list($state); $hits = $email === '' ? [] : array_keys(array_filter($crew, fn($t) => ($t['active'] ?? true) && mb_strtolower(trim((string)($t['email'] ?? ''))) === $email));
+            require_ok(count($hits) <= 1, 'Hay más de un técnico con tu correo. Pide a un administrador que lo corrija.');
+            $profiles = is_array($state['profiles'] ?? null) || is_object($state['profiles'] ?? null) ? (array)$state['profiles'] : [];
+            if ($hits) { $crew[$hits[0]]['photo'] = $photo; $state['crew'] = $crew; unset($profiles[$key]); }
+            elseif ($photo === '') unset($profiles[$key]); else $profiles[$key] = ['photo' => $photo];
+            $state['profiles'] = (object)$profiles; $summary = ($photo === '' ? 'Foto de perfil quitada: ' : 'Foto de perfil actualizada: ') . $actor; break;
         case 'crew_photo':
             $crew = crew_list($state); $tid = clean_text($cmd['crewId'] ?? '', 20); $photo = ($cmd['photo'] ?? '') === '' ? '' : clean_jpeg($cmd['photo'], 90000); $found = false;
             foreach ($crew as &$t) if ($t['id'] === $tid) { $t['photo'] = $photo; $found = true; $name = $t['name']; } unset($t);

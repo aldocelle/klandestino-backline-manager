@@ -125,6 +125,7 @@ export function applyDemoCommand(source,cmd){
       const crew=structuredClone(crewOf(s)),name=text(cmd.name,80),t=crew.find(t=>t.id===cmd.crewId);ok(name,'Escribe el nombre del técnico.');ok(t,'Técnico no encontrado.');
       ok(!crew.some(x=>x.id!==t.id&&x.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')),'Ya hay un técnico con ese nombre.');t.name=name;s.crew=crew;summary='Equipo técnico actualizado: '+name;break;
     }
+    case 'my_photo':{const key='demo',photo=cmd.photo?jpeg(cmd.photo,90000):'',profiles={...(s.profiles&&!Array.isArray(s.profiles)?s.profiles:{})};if(photo)profiles[key]={photo};else delete profiles[key];s.profiles=profiles;summary=(photo?'Foto de perfil actualizada: ':'Foto de perfil quitada: ')+'Operador demo';break;}
     case 'crew_photo':{const crew=structuredClone(crewOf(s)),t=crew.find(t=>t.id===cmd.crewId);ok(t,'Técnico no encontrado.');t.photo=cmd.photo?jpeg(cmd.photo,90000):'';s.crew=crew;summary='Foto de técnico actualizada: '+t.name;break;}
     case 'report_issue':{
       ids=selected(cmd);ok(ids.length<=60,'Reporta hasta 60 piezas por informe.');const kind=cmd.kind;ok(['damage','missing'].includes(kind),'Elige si es daño o faltante.');note=text(cmd.note,1500);ok(note.length>=3,'Describe el daño o faltante.');by=crewName(s,cmd.responsibleId);

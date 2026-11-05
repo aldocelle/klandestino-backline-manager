@@ -80,9 +80,11 @@ try {
     }
     if ($action === 'command' && $method === 'POST') {
         $body = request_body(); $type = is_array($body['command'] ?? null) ? (string)($body['command']['type'] ?? '') : '';
-        require_ok(role_allows($user['role'], $type), $user['role'] === 'reader' ? 'Tu usuario tiene acceso de consulta.' : 'Tu rol no permite esta acción. Pídesela a un encargado.');
+        require_ok(command_allowed($user['role'], $type), $user['role'] === 'reader' ? 'Tu usuario tiene acceso de consulta.' : 'Tu rol no permite esta acción. Pídesela a un encargado.');
         require_ok(is_int($body['revision'] ?? null), 'Revisión de inventario inválida.');
-        try { reply(['state' => $store->command($body['command'] ?? [], $user['name'], $body['revision'])]); }
+        $cmd = is_array($body['command'] ?? null) ? $body['command'] : [];
+        if ($type === 'my_photo') $cmd = ['type' => 'my_photo', 'photo' => $cmd['photo'] ?? '', 'userEmail' => (string)$user['email']]; // solo la foto viene del cliente
+        try { reply(['state' => $store->command($cmd, $user['name'], $body['revision'])]); }
         catch (DomainError $e) { if ($e->getMessage() === 'CONFLICT') reply(['error' => 'Otro encargado actualizó el inventario. Revisa la selección y vuelve a confirmar.', 'state' => $store->read()], 409); throw $e; }
     }
     if ($action === 'password_change' && $method === 'POST') {
