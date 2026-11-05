@@ -131,7 +131,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
                 $state['events'][] = ['id' => $eventId, 'name' => $name, 'place' => $place, 'start' => $start, 'end' => $end,
                     'responsible' => $responsible, 'vehicle' => clean_text($cmd['vehicle'] ?? '', 120), 'driver' => clean_text($cmd['driver'] ?? '', 120), 'responsiblePhone' => clean_phone($cmd['responsiblePhone'] ?? ''), 'driverPhone' => clean_phone($cmd['driverPhone'] ?? ''), 'service' => clean_text($cmd['service'] ?? 'Backline', 80), 'poster' => clean_poster($cmd['poster'] ?? ''), 'client' => clean_text($cmd['client'] ?? '', 160), 'address' => clean_text($cmd['address'] ?? '', 200), 'teamIds' => [], 'crewIds' => [], 'items' => []];
                 $ei = count($state['events']) - 1;
-            } else { $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); require_ok(strtotime($state['events'][$ei]['end']) > time(), 'Este evento ya terminó.'); }
+            } else { $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); require_ok(strtotime($state['events'][$ei]['end']) > time(), 'Este evento ya terminó.'); require_ok(empty($state['events'][$ei]['trashed']) && ($state['events'][$ei]['status'] ?? '') !== 'done', 'Este evento está en borradores o archivado. Restáuralo o reábrelo antes de moverle equipos.'); }
             foreach ($ids as $id) {
                 $ai = entity_index($state['assets'], $id);
                 $state['assets'][$ai]['status'] = 'reserved'; $state['assets'][$ai]['eventId'] = $eventId;
@@ -189,6 +189,7 @@ function apply_command(array $state, array $cmd, string $actor): array {
         case 'release':
         case 'return':
             $eventId = clean_text($cmd['eventId'] ?? '', 80); $ei = entity_index($state['events'], $eventId); $ids = selected_ids($cmd);
+            if ($type === 'dispatch') require_ok(empty($state['events'][$ei]['trashed']) && ($state['events'][$ei]['status'] ?? '') !== 'done', 'Este evento está en borradores o archivado. Restáuralo o reábrelo antes de moverle equipos.');
             $condition = $cmd['condition'] ?? 'ok'; $note = clean_text($cmd['note'] ?? '', 1500);
             require_ok(in_array($condition, ['ok', 'damage', 'missing'], true), 'Estado de devolución inválido.');
             $by = $type === 'release' ? null : crew_name($state, $cmd['responsibleId'] ?? '');
