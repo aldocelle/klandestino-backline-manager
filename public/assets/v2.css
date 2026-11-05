@@ -657,3 +657,7 @@ button.settings-utility{width:100%;text-align:left;font:inherit;cursor:pointer}
 @keyframes ev-blk-flash{50%{border-color:var(--gold);background:#e3a83d26}}
 .btn.is-blocked{opacity:.6}
 @media(prefers-reduced-motion:reduce){.ev-blockers.flash{animation:none}}
+
+/* ===== Equipos: sin pestañas de estado; aviso cuando se llega filtrado ===== */
+.inv-status-filter{align-items:center;margin:4px 0 12px}
+.inv-status-filter span{flex:1}
