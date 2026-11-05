@@ -27,7 +27,7 @@ function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon
     if (preg_match('/^photo:(\d)$/D', $icon, $m)) { require_ok((int)$m[1] < count($asset['photos'] ?? []), 'Esa foto ya no existe.'); return $icon; }
     require_ok(in_array($icon, equipment_icon_keys(), true), 'Ícono inválido.'); return $icon; }
 // Permisos por rol: administrador y encargado, todo; técnico, solo el trabajo diario de bodega; consulta, nada.
-function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status']; }
+function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status', 'event_trash', 'event_restore']; }
 function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
 function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
 function check_event_dates(string $start, string $end): void { require_ok((bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/D', $start) && strtotime($start) !== false && strtotime($end) !== false && strtotime($end) > strtotime($start), 'La devolución debe ser posterior a la salida.'); }
@@ -159,6 +159,19 @@ function apply_command(array $state, array $cmd, string $actor): array {
             require_ok(in_array($st, timing_event_statuses(), true), 'Estado de evento inválido.');
             if ($st === 'done') foreach ($state['events'][$ei]['items'] as $it) require_ok(!in_array($it['status'], ['reserved', 'out'], true), 'Antes de cerrar, registra la salida y la devolución de todos los equipos, o libera las reservas.');
             $state['events'][$ei]['status'] = $st; $summary = ($st === 'done' ? 'Evento cerrado: ' : 'Estado del evento actualizado: ') . $state['events'][$ei]['name']; break;
+        case 'event_trash':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $e = &$state['events'][$ei]; $eventId = $e['id'];
+            foreach ($e['items'] as $it) require_ok(!in_array($it['status'], ['out', 'missing'], true), 'Este evento tiene equipos fuera o faltantes. Registra la devolución antes de borrarlo.');
+            $ids = []; foreach ($e['items'] as &$it) if ($it['status'] === 'reserved') { $ai = entity_index($state['assets'], $it['assetId']); $state['assets'][$ai]['status'] = 'available'; $state['assets'][$ai]['eventId'] = null; $it['status'] = 'released'; $ids[] = $it['assetId']; } unset($it);
+            $e['trashed'] = true; $summary = 'Evento movido a borradores: ' . $e['name'] . ($ids ? ' · ' . count($ids) . ' reservas liberadas' : ''); unset($e); break;
+        case 'event_restore':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $eventId = $state['events'][$ei]['id']; $state['events'][$ei]['trashed'] = false;
+            $summary = 'Evento restaurado: ' . $state['events'][$ei]['name']; break;
+        case 'event_purge':
+            $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $gone = $state['events'][$ei]; $eventId = $gone['id'];
+            require_ok(!empty($gone['trashed']), 'Primero mueve el evento a borradores.');
+            foreach ($gone['items'] as $it) require_ok($it['status'] === 'released', 'Este evento ya tuvo salidas o devoluciones: se conserva en borradores para no perder el historial.');
+            array_splice($state['events'], $ei, 1); $summary = 'Evento eliminado definitivamente: ' . $gone['name']; break;
         case 'team_save':
             $teams = team_list($state); $tid = clean_text($cmd['teamId'] ?? '', 40); $name = clean_text($cmd['name'] ?? '', 80); require_ok($name !== '', 'Escribe el nombre del equipo.');
             $active = array_column(array_filter(crew_list($state), fn($t) => $t['active'] ?? true), 'id');
