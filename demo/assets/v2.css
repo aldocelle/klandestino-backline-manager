@@ -609,3 +609,31 @@ button.settings-utility{width:100%;text-align:left;font:inherit;cursor:pointer}
   .qrs-groups{max-height:55vh}
 }
 .qrs-pages.roll{flex-direction:row;flex-wrap:wrap;justify-content:center;padding:14px}
+
+/* ── Menú «Más» del celular (sesión 39): pestaña en la barra inferior y hoja con todas las secciones del sidebar ── */
+.mobile-more-tab,.more-sheet{display:none}
+@media(max-width:640px){
+  .mobile-more-tab{display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:6px;font:inherit;font-size:12.5px;min-height:56px;min-width:47px;color:#959fac;background:none;border:0;padding:0;position:relative;cursor:pointer}
+  .mobile-more-tab .icon{width:22px;height:22px}
+  .mobile-more-tab.active,.mobile-more-tab[aria-expanded="true"]{color:var(--gold)}
+  .mobile-more-tab.active:before{content:'';position:absolute;top:-10px;background:var(--gold);height:2px;width:22px;border-radius:2px}
+  .more-sheet:not([hidden]){display:block;position:fixed;inset:0;z-index:45}
+  .more-backdrop{position:absolute;inset:0;background:#050708b8;animation:fade-in .16s ease}
+  .more-panel{position:absolute;left:0;right:0;bottom:0;max-height:calc(100dvh - 70px);overflow-y:auto;background:#17191c;border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:8px 16px max(18px,env(safe-area-inset-bottom));box-shadow:0 -18px 40px #000a;animation:more-up .22s var(--ease)}
+  .more-grab{width:40px;height:4px;border-radius:4px;background:#3a4048;margin:2px auto 8px}
+  .more-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .more-head strong{font-size:16px}
+  .more-panel .nav-section{display:block;margin:14px 2px 8px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .more-grid a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:78px;padding:10px 6px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-size:12.5px;text-align:center;line-height:1.2;position:relative;text-decoration:none}
+  .more-grid a .icon{width:22px;height:22px;color:#b4bac3}
+  .more-grid a.active{border-color:var(--gold);color:var(--gold);background:#2a2416}
+  .more-grid a.active .icon{color:var(--gold)}
+  .more-grid .nav-count{position:absolute;top:6px;right:8px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--gold);color:#16130a;font-size:11px;font-weight:700;line-height:18px}
+  .more-grid .nav-count:empty{display:none}
+  .more-help{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;min-height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+  .more-help .icon{width:18px;height:18px}
+  body.more-open{overflow:hidden}
+}
+@keyframes more-up{from{transform:translateY(100%)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.more-panel,.more-backdrop{animation:none}}
