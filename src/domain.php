@@ -169,8 +169,10 @@ function apply_command(array $state, array $cmd, string $actor): array {
             $summary = 'Evento restaurado: ' . $state['events'][$ei]['name']; break;
         case 'event_purge':
             $ei = entity_index($state['events'], clean_text($cmd['eventId'] ?? '', 80)); $gone = $state['events'][$ei]; $eventId = $gone['id'];
-            require_ok(!empty($gone['trashed']), 'Primero mueve el evento a borradores.');
-            foreach ($gone['items'] as $it) require_ok($it['status'] === 'released', 'Este evento ya tuvo salidas o devoluciones: se conserva en borradores para no perder el historial.');
+            // Desde Borradores o Archivados, sin piezas pendientes. Los movimientos se conservan como historial.
+            require_ok(!empty($gone['trashed']) || ($gone['status'] ?? '') === 'done', 'Primero borra o cierra el evento: solo se eliminan los de Borradores o Archivados.');
+            foreach ($gone['items'] as $it) require_ok(!in_array($it['status'], ['reserved', 'out', 'missing'], true), 'Este evento tiene piezas reservadas, fuera o faltantes. Resuélvelas antes de eliminarlo.');
+            foreach ($state['assets'] as $a) require_ok(($a['eventId'] ?? null) !== $eventId, 'Este evento tiene piezas reservadas, fuera o faltantes. Resuélvelas antes de eliminarlo.');
             array_splice($state['events'], $ei, 1); $summary = 'Evento eliminado definitivamente: ' . $gone['name']; break;
         case 'team_save':
             $teams = team_list($state); $tid = clean_text($cmd['teamId'] ?? '', 40); $name = clean_text($cmd['name'] ?? '', 80); require_ok($name !== '', 'Escribe el nombre del equipo.');
