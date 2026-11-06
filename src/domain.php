@@ -27,7 +27,7 @@ function clean_icon(mixed $icon, array $asset): string { $icon = is_string($icon
     if (preg_match('/^photo:(\d)$/D', $icon, $m)) { require_ok((int)$m[1] < count($asset['photos'] ?? []), 'Esa foto ya no existe.'); return $icon; }
     require_ok(in_array($icon, equipment_icon_keys(), true), 'Ícono inválido.'); return $icon; }
 // Permisos por rol: administrador y encargado, todo; técnico, solo el trabajo diario de bodega; consulta, nada.
-function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status', 'event_trash', 'event_restore']; }
+function tech_commands(): array { return ['create_event', 'reserve', 'dispatch', 'release', 'return', 'report_issue', 'transfer', 'event_details', 'event_staff', 'event_status', 'event_trash', 'event_restore', 'event_purge']; }
 function team_list(array $state): array { return isset($state['teams']) && is_array($state['teams']) ? $state['teams'] : []; }
 function clean_ids(mixed $list, array $valid, int $max, string $error): array { if ($list === null || $list === '') return []; require_ok(is_array($list) && count($list) <= $max, $error); $out = []; foreach ($list as $id) { require_ok(is_string($id) && in_array($id, $valid, true), $error); $out[$id] = true; } return array_keys($out); }
 // Finalizado: aún no se cierra, pero ya pasó su devolución programada o volvieron todas sus piezas.
