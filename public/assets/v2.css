@@ -835,3 +835,23 @@ table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){box-shad
 .nav-sub a{font-size:.95em;min-height:38px}
 .sidebar .nav a[data-nav="inventory"].open:not(.active){color:var(--text)}
 @media(max-width:940px){.nav-sub{margin-left:0;padding-left:0;border-left:0}}
+/* Evento rápido y agregar equipos sin carro */
+.quick-event{display:grid;gap:14px;max-width:560px}
+.quick-event label{display:grid;gap:6px;font-size:14px}
+.quick-event>label input{min-height:52px;font-size:17px}
+.quick-more summary{cursor:pointer;color:var(--muted);padding:6px 0}
+.quick-go{min-height:54px;font-size:16px;justify-content:center}
+.add-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;margin-bottom:10px;border:2px solid #2b62c4;border-radius:12px;background:#141f33}
+.add-bar>div:first-child{display:grid;gap:1px;min-width:0}
+.add-bar strong{font-size:18px}
+.add-bar small{color:#b8c6e0}
+.add-kits{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.add-scan{margin-bottom:12px}
+.add-scan summary{display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:10px}
+.add-scan[open] summary{margin-bottom:10px}
+.io-btn.add-btn{border-style:solid;border-color:#2b62c4;color:#9ec0ff;font-size:10.5px;padding:3px 5px}
+.io-btn.add-btn:hover,.io-btn.add-btn:focus-visible{background:#2b62c4;color:#fff;border-color:#2b62c4}
+button.io-booked{border:0;font:inherit;font-size:11.5px;font-weight:800;letter-spacing:.3px;cursor:pointer;min-height:30px;display:inline-flex;align-items:center;gap:3px;padding:3px 5px}
+button.io-booked .icon{width:12px;height:12px}
+.io-booked.dim{opacity:.45}
+@media(max-width:640px){.add-bar .flex{width:100%}.add-bar .btn{flex:1;justify-content:center}}
