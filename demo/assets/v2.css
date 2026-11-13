@@ -829,3 +829,9 @@ table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){box-shad
 @media(max-width:640px){.ros-card{flex-wrap:wrap}}
 .sidebar .nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a3f46 transparent}
 .sidebar .nav>*{flex:none}
+/* Submenú de Equipos en el sidebar */
+.nav-sub{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 20px;padding-left:10px;border-left:1px solid var(--line)}
+.nav-sub[hidden]{display:none}
+.nav-sub a{font-size:.95em;min-height:38px}
+.sidebar .nav a[data-nav="inventory"].open:not(.active){color:var(--text)}
+@media(max-width:940px){.nav-sub{margin-left:0;padding-left:0;border-left:0}}
