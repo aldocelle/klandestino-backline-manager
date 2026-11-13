@@ -778,3 +778,9 @@ button.io-cart:hover,button.io-cart:focus-visible{background:#ffd75a}
 .sheet-section>.spread{margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .sheet-section h2{margin:0}
 .kit-grid+.sheet-section .sheet-wrap,.section-summary~.sheet-wrap{max-height:70dvh}
+/* Hoja dentro del evento: ancho automático, con casilla de selección */
+table.sheet.sheet-auto{table-layout:auto;width:100%}
+table.sheet.sheet-auto th.io,table.sheet.sheet-auto td.io{width:74px;min-width:74px}
+table.sheet .row-check{width:1%;text-align:center;padding:5px 10px}
+table.sheet thead th.row-check{padding:5px 10px}
+.event-sheet{max-height:none;margin-bottom:12px}
