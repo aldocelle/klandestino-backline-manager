@@ -773,3 +773,8 @@ button.rb-tile:hover,button.rb-tile:focus-visible{border-color:#fff;outline:none
 button.io-cart{cursor:pointer;min-height:30px}
 button.io-cart:hover,button.io-cart:focus-visible{background:#ffd75a}
 .sheet-wrap table.sheet tbody tr.row-cart-y:not(.x)>td{background-color:#2e2710}
+/* La misma hoja dentro de Equipos, Drum Kits, Guitarra y Bajo */
+.sheet-section{margin-top:26px}
+.sheet-section>.spread{margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.sheet-section h2{margin:0}
+.kit-grid+.sheet-section .sheet-wrap,.section-summary~.sheet-wrap{max-height:70dvh}
