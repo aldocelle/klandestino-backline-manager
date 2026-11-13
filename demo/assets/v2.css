@@ -807,3 +807,14 @@ table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){box-shad
 .arr-newtech{margin-top:18px;padding:14px;border:1px dashed var(--line);border-radius:12px;display:grid;gap:10px}
 .arr-newtech label{display:grid;gap:3px}
 .arr-newtech small{color:var(--muted);font-size:12.5px}
+/* In & Out rápido: un bloque por evento con «Llegó todo» */
+.io-event{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.io-event-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.io-event-head h2{margin:0;font-size:20px}
+.io-event-head small{color:var(--muted)}
+.btn.io-all{min-height:48px;font-weight:700;border-width:2px}
+.btn.io-all.in{background:#175c36;border-color:#2fa866;color:#fff}
+.btn.io-all.out{background:#7c231c;border-color:#d9483b;color:#fff}
+.btn.io-all:hover,.btn.io-all:focus-visible{border-color:#fff}
+.rb-more{font-style:normal;font-size:11px;opacity:.75;margin-top:auto}
+@media(max-width:640px){.io-event-head .flex{width:100%}.btn.io-all{flex:1;justify-content:center}}
