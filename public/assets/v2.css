@@ -784,3 +784,14 @@ table.sheet.sheet-auto th.io,table.sheet.sheet-auto td.io{width:74px;min-width:7
 table.sheet .row-check{width:1%;text-align:center;padding:5px 10px}
 table.sheet thead th.row-check{padding:5px 10px}
 .event-sheet{max-height:none;margin-bottom:12px}
+/* Columna HOLD: CART amarillo, BOOKED azul */
+table.sheet th.hold .sort-btn{justify-content:center}
+table.sheet td.hold{text-align:center}
+.io-booked{background:#2b62c4;color:#eef4ff}
+.io-cart{font-size:11.5px;font-weight:800;letter-spacing:.5px}
+.sheet-wrap table.sheet tbody tr.row-booked:not(.x)>td{background-color:#141f33}
+.sheet-wrap table.sheet tbody tr:not(.x).row-booked td.io{background:#141f33}
+.sheet-wrap table.sheet tbody tr:not(.x).row-cart-y td.io{background:#2e2710}
+@media(max-width:640px){table.sheet th.hold .sort-arrow{display:none}table.sheet td.hold,table.sheet th.hold{padding-left:3px;padding-right:3px}}
+table.sheet th.io.hold,table.sheet td.io.hold{right:148px;box-shadow:inset 2px 0 #4a5058}
+table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){box-shadow:inset 1px 0 #3a3f46}
