@@ -818,3 +818,14 @@ table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){box-shad
 .btn.io-all:hover,.btn.io-all:focus-visible{border-color:#fff}
 .rb-more{font-style:normal;font-size:11px;opacity:.75;margin-top:auto}
 @media(max-width:640px){.io-event-head .flex{width:100%}.btn.io-all{flex:1;justify-content:center}}
+/* Utilidades en el menú y página Run of Show */
+.nav a[role=button]{cursor:pointer}
+.ros-list{display:grid;gap:10px}
+.ros-card{display:flex;align-items:center;gap:14px;padding:14px 16px;color:var(--text);text-decoration:none}
+.ros-card>div{flex:1;min-width:0;display:grid;gap:2px}
+.ros-card small{color:var(--muted)}
+.ros-card:hover,.ros-card:focus-visible{border-color:var(--gold)}
+.ros-go{display:flex;align-items:center;gap:6px;color:var(--gold);white-space:nowrap}
+@media(max-width:640px){.ros-card{flex-wrap:wrap}}
+.sidebar .nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a3f46 transparent}
+.sidebar .nav>*{flex:none}
