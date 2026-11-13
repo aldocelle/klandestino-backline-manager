@@ -680,3 +680,47 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media(min-width:901px){body::before{left:248px;inset-block:72px 0}}
 .auth-screen{background:linear-gradient(#08090bc2,#08090bc2),url(totem-descanso.jpg) center/contain no-repeat,#000}
 @media print{body::before{display:none}}
+/* ===== Planilla (hoja de cálculo con IN / OUT) ===== */
+table.sheet thead th:has(.sort-btn){padding:0}
+.sort-btn{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;min-height:34px;padding:5px 8px;border:0;background:none;color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer;text-align:left}
+th.io .sort-btn{justify-content:center}
+.sort-btn:hover,.sort-btn:focus-visible{color:var(--gold);background:#2a2e34}
+.sort-btn.on{color:var(--gold)}
+.sort-arrow{font-size:9px;opacity:.55;flex:none}
+.sort-btn{overflow:hidden;white-space:nowrap}
+.col-resize{position:absolute;top:0;right:-5px;bottom:0;width:10px;z-index:3;cursor:col-resize;touch-action:none}
+.col-resize:after{content:'';position:absolute;top:6px;bottom:6px;left:4px;width:2px;border-radius:2px;background:transparent;transition:background .15s}
+.col-resize:hover:after,.col-resize:focus-visible:after,.col-resize.dragging:after{background:var(--gold)}
+.col-resize:focus-visible{outline:none}
+body.col-resizing,body.col-resizing *{cursor:col-resize!important;user-select:none}
+.sort-btn.on .sort-arrow{opacity:1}
+.sheet-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.sheet-toolbar .search-input{flex:1 1 260px}
+.sheet-count{font-size:12px;margin-left:auto}
+.sheet-wrap{overflow:auto;max-height:calc(100dvh - 250px);border:1px solid #3a3f46;border-radius:6px;background:#121417}
+table.sheet{border-collapse:collapse;table-layout:fixed;font-size:12.5px;font-variant-numeric:tabular-nums}
+table.sheet th,table.sheet td{border:1px solid #2c3036;padding:5px 8px;text-align:left;white-space:nowrap;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+table.sheet thead th{overflow:visible}
+table.sheet thead th{position:sticky;top:0;z-index:1;background:#1f2328;color:#c9ced6;font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.sheet-wrap table.sheet tbody tr:nth-child(even):not(.x)>td{background-color:#16191d}
+.sheet-wrap table.sheet tbody tr:not(.x):hover>td{background-color:#22262c}
+.sheet-wrap table.sheet tbody tr.row-out:not(.x)>td{background-color:#2a1a1a}
+table.sheet tbody tr.in-cart{box-shadow:inset 3px 0 var(--gold)}
+table.sheet .num{color:#7d8590;text-align:right;width:1%}
+table.sheet .text-link{font-size:inherit;text-align:left}
+table.sheet th.io,table.sheet td.io{text-align:center;position:sticky;right:0;background:#121417;box-shadow:inset 1px 0 #3a3f46}
+table.sheet th.io:nth-last-child(2),table.sheet td.io:nth-last-child(2){right:74px;box-shadow:inset 2px 0 #4a5058}
+.sheet-wrap table.sheet tbody tr:not(.x):nth-child(even) td.io{background:#16191d}
+.sheet-wrap table.sheet tbody tr:not(.x).row-out td.io{background:#2a1a1a}
+.sheet-wrap table.sheet tbody tr:not(.x):hover td.io{background:#22262c}
+table.sheet thead th.io{background:#1f2328;z-index:2}
+.content:has(.sheet-wrap){min-width:0;max-width:100%}
+.sheet-wrap{max-width:100%;min-width:0}
+table.sheet td.io small{display:block;font-size:10px;color:#8a929c;margin-top:1px}
+.io-mark{display:inline-block;min-width:42px;padding:3px 6px;border-radius:4px;font-weight:800;font-size:11.5px;letter-spacing:.5px}
+.io-in{background:#1e5a34;color:#d7f7e1}
+.io-out{background:#7a2424;color:#ffe1e1}
+.io-btn{min-width:46px;min-height:30px;padding:3px 8px;border:1px dashed #59606a;border-radius:4px;background:none;color:#aab1bb;font:inherit;font-weight:700;font-size:11.5px;cursor:pointer}
+.io-btn:hover,.io-btn:focus-visible{border-style:solid;border-color:var(--gold);color:var(--gold)}
+.io-btn.on{border-style:solid;border-color:var(--gold);background:#2a2416;color:var(--gold)}
+@media(max-width:640px){.sheet-wrap{max-height:calc(100dvh - 300px)}.sheet-count{margin-left:0;width:100%}.sheet-toolbar select{flex:1 1 30%;min-width:0}#sheetTable{table-layout:auto;width:100%!important}#sheetTable col{width:auto!important}.col-resize{display:none}table.sheet .sh-hide{display:none}table.sheet td:nth-child(3){white-space:normal;min-width:130px}}
